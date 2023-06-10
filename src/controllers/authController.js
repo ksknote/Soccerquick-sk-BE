@@ -7,6 +7,7 @@ const {
   signUpSchema,
   logInSchema,
   validateUniqueUserIdSchema,
+  validatePasswordSchema,
 } = require('../validator/authValidator');
 
 //[ 유저 회원가입 ]
@@ -30,7 +31,7 @@ const signUp = async (req, res, next) => {
   }
 
   try {
-    const result = await authService.signUpUser({
+    const result = await authService.signUp({
       user_id,
       password,
       name,
@@ -40,13 +41,13 @@ const signUp = async (req, res, next) => {
       gender,
     });
 
-    if (result.statusCode === 404)
-      return next(new AppError(404, result.message));
+    if (result.statusCode !== 201)
+      return next(new AppError(result.statusCode, result.message));
 
     res.status(201).json({ message: result.message });
   } catch (error) {
     console.error(error);
-    next(new AppError(500, '회원가입 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
@@ -62,14 +63,10 @@ const logIn = async (req, res, next) => {
   }
 
   try {
-    const result = await authService.logInUser(user_id, password);
-    if (
-      result.statusCode === 400 ||
-      result.statusCode === 403 ||
-      result.statusCode === 404
-    ) {
+    const result = await authService.logIn(user_id, password);
+
+    if (result.statusCode !== 200)
       return next(new AppError(result.statusCode, result.message));
-    }
 
     const { accessToken, refreshToken, userData } = result;
     const {
@@ -86,7 +83,9 @@ const logIn = async (req, res, next) => {
     } = userData;
 
     //[accessToken, refreshToken 각각 response 헤더, 쿠키 세팅]
-    res.setHeader('Authorization', `Bearer ${accessToken}`);
+    res.cookie('accessToken', accessToken, {
+      httpOnly: false,
+    });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: false, //배포 시 httpOnly: true, secure: true,
     });
@@ -109,7 +108,24 @@ const logIn = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '로그인 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+// [ 유저 로그아웃 ]
+const logOut = async (req, res, next) => {
+  try {
+    const result = await authService.logOut(req, res);
+
+    if (result.statusCode !== 200)
+      return next(new AppError(result.statusCode, result.message));
+
+    res.status(200).json({
+      message: result.message,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
@@ -127,16 +143,48 @@ const validateUniqueUserId = async (req, res, next) => {
   try {
     const result = await authService.validateUniqueUserId(user_id);
 
-    if (result.statusCode === 400)
-      return next(new AppError(400, result.message));
+    if (result.statusCode !== 200)
+      return next(new AppError(result.statusCode, result.message));
 
     res.status(200).json({
       message: result.message,
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '아이디 중복체크 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
-module.exports = { logIn, signUp, validateUniqueUserId };
+// [비밀번호 체크]   유저 아이디는 나중에 토큰으로 받는다.
+const validatePassword = async (req, res, next) => {
+  const { user_id, password } = req.body;
+
+  const { error } = validatePasswordSchema.validate({ user_id, password });
+
+  if (error) {
+    const message = errorMessageHandler(error);
+    return next(new AppError(400, message));
+  }
+
+  try {
+    const result = await authService.validatePassword(user_id, password);
+
+    if (result.statusCode !== 200)
+      return next(new AppError(result.statusCode, result.message));
+
+    res.status(200).json({
+      message: result.message,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+module.exports = {
+  logIn,
+  logOut,
+  signUp,
+  validateUniqueUserId,
+  validatePassword,
+};

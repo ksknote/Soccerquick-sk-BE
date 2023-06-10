@@ -6,10 +6,10 @@ const createPostId = async () => {
   return `post${index}`;
 };
 
-const createGroundId = async () => {
+const createDomId = async () => {
   const { nanoid } = await import('nanoid');
   const index = nanoid(4);
-  return `ground${index}`;
+  return `dom${index}`;
 };
 
 const createReviewId = async () => {
@@ -24,9 +24,23 @@ const createCommentId = async () => {
   return `comment${index}`;
 };
 
+const createGroupId = async () => {
+  const { nanoid } = await import('nanoid');
+  const index = nanoid(4);
+  return `group${index}`;
+};
+
+const createGuestId = async () => {
+  const { nanoid } = await import('nanoid');
+  const index = nanoid(3);
+  return `guest${index}`;
+};
+
 module.exports = {
   createPostId,
-  createGroundId,
+  createDomId,
   createReviewId,
   createCommentId,
+  createGroupId,
+  createGuestId,
 };

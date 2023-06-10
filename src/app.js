@@ -8,16 +8,25 @@ const { connectToDatabase } = require('./database/db');
 const { PORT, DB_HOST, DB_NAME } = require('./envconfig');
 const { errorHandler } = require('./middlewares/errorHandler');
 
+//api
+// const { createFutsal } = require('./api/data');
+// createFutsal();
+
 //router
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/authRouter');
 const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
 const communityRouter = require('./routes/communityRouter');
-const groundRouter = require('./routes/groundRouter');
+const domRouter = require('./routes/domRouter');
 const reviewRouter = require('./routes/reviewRouter');
+const groupRouter = require('./routes/groupRouter');
 
-const origins = ['http://localhost:8800'];
+const origins = [
+  'http://localhost:8800',
+  'http://localhost:3000',
+  'http://kdt-sw-4-team02.elicecoding.com',
+];
 const corsOptions = {
   origin: origins,
   credentials: true,
@@ -33,9 +42,7 @@ connectToDatabase()
       console.log('탈퇴 후 6개월 지난 회원들을 삭제중입니다..');
       await deleteExpiredWithdrawnUsers();
     });
-
     app.use('/', indexRouter);
-
     app.listen(PORT, () => {
       console.log('PORT:', PORT);
       console.log('DB_HOST:', DB_HOST);
@@ -48,10 +55,11 @@ connectToDatabase()
     process.exit(1);
   });
 
-app.use('/auth', authRouter);
-app.use('/user', userRouter);
-app.use('/admin', adminRouter);
-app.use('/community', communityRouter);
-app.use('/ground', groundRouter);
-app.use('/review', reviewRouter);
+app.use('/auths', authRouter);
+app.use('/users', userRouter);
+app.use('/admins', adminRouter);
+app.use('/communities', communityRouter);
+app.use('/doms', domRouter);
+app.use('/reviews', reviewRouter);
+app.use('/groups', groupRouter);
 app.use(errorHandler);

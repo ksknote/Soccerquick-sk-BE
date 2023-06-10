@@ -23,7 +23,10 @@ const getAllUserInfo = async (user_id) => {
         role,
         gender,
         phone_number,
+        login_banned,
+        community_banned,
       } = user;
+
       return {
         admin_id,
         user_id,
@@ -33,16 +36,21 @@ const getAllUserInfo = async (user_id) => {
         phone_number,
         role,
         gender,
+        login_banned,
+        community_banned,
+        login_banEndDate: user.login_banEndDate,
+        community_banEndDate: user.community_banEndDate,
         createdAt: user.createdAt,
       };
     });
     return {
+      statusCode: 200,
       message: '모든 유저 정보 조회 성공',
       data: allUserData,
     };
   } catch (error) {
     console.error(error);
-    return new AppError(500, '관리자 정보 조회 실패');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
@@ -68,18 +76,17 @@ const banUser = async (user_id, banUserId) => {
 
     if (foundBanUser) {
       const currentDate = new Date();
-      const banEndDate = getBanTime(currentDate, 2000);
-      // 시간 1000 단위, 1000당 1일, 프론트에서 받아야될듯
 
       foundBanUser.login_banned = true;
-      foundBanUser.login_banEndDate = banEndDate;
+      foundBanUser.login_banEndDate = getBanTime(currentDate, 2000); // 시간 1000 단위, 1000당 1일
+
       await foundBanUser.save();
 
-      return { message: '로그인 정지 성공' };
+      return { statusCode: 200, message: '로그인 정지 성공' };
     }
   } catch (error) {
     console.error(error);
-    throw new AppError(500, '로그인 정지 실패');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
@@ -105,18 +112,17 @@ const banCommunity = async (user_id, banUserId) => {
 
     if (foundBanUser) {
       const currentDate = new Date();
-      const banEndDate = getBanTime(currentDate, 2000);
-      // 시간 1000 단위, 1000당 1일, 프론트에서 받아야될듯
 
       foundBanUser.community_banned = true;
-      foundBanUser.community_banEndDate = banEndDate;
+      foundBanUser.community_banEndDate = getBanTime(currentDate, 2000); // 시간 1000 단위, 1000당 1일
+
       await foundBanUser.save();
 
-      return { message: '커뮤니티 정지 성공' };
+      return { statusCode: 200, message: '커뮤니티 정지 성공' };
     }
   } catch (error) {
     console.error(error);
-    throw new AppError(500, '커뮤니티 정지 실패');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
@@ -156,12 +162,10 @@ const updateUserRole = async (user_id, updateUser) => {
 
     await foundUpdateUser.save();
 
-    return {
-      message: '유저 직위 변경 성공',
-    };
+    return { statusCode: 200, message: '유저 직위 변경 성공' };
   } catch (error) {
     console.error(error);
-    return new AppError(500, '유저 직위 변경 실패');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 

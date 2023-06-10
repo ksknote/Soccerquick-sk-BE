@@ -12,26 +12,24 @@ const {
 
 //[ 유저 회원가입 ]
 /** (유저 입력 formdata) */
-const signUpUser = async (formData) => {
+const signUp = async (formData) => {
   const { user_id, password, name, nick_name, email, phone_number, gender } =
     formData;
+
   try {
-    const foundUser = await User.findOne({
-      $or: [{ user_id }, { name }, { email }],
-    });
-    // 이미 사용 중이라면 데이터 추가 안하고 에러를 반환하기 위해 겹치는 요소 컨트롤러로.
-    if (foundUser) {
-      if (foundUser.user_id === user_id) {
-        return new AppError(404, '이미 존재하는 아이디입니다.');
-      }
+    const foundUserId = await User.findOne({ user_id });
 
-      if (foundUser.nick_name === nick_name) {
-        return new AppError(404, '이미 존재하는 닉네임입니다.');
-      }
+    if (foundUserId) return new AppError(400, '이미 존재하는 아이디입니다.');
 
-      if (foundUser.email === email) {
-        return new AppError(404, '이미 존재하는 이메일입니다.');
-      }
+    const foundUserEmail = await User.findOne({ email });
+
+    if (foundUserEmail) {
+      return new AppError(400, '이미 존재하는 이메일입니다.');
+    }
+
+    const foundUserNickName = await User.findOne({ nick_name });
+    if (foundUserNickName) {
+      return new AppError(400, '이미 존재하는 닉네임입니다.');
     }
 
     const hashedPassword = await hashPassword(password);
@@ -48,16 +46,16 @@ const signUpUser = async (formData) => {
 
     await addUser.save();
 
-    return { message: '회원가입에 성공하였습니다.' };
+    return { statusCode: 201, message: '회원가입에 성공하였습니다.' };
   } catch (error) {
     console.error(error);
-    throw new AppError(500, '회원가입에 실패하였습니다.');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
 //[유저 로그인]
 /** (아이디, 패스워드)*/
-const logInUser = async (user_id, password) => {
+const logIn = async (user_id, password) => {
   try {
     const foundUser = await User.findOne({ user_id });
 
@@ -122,8 +120,9 @@ const logInUser = async (user_id, password) => {
     const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
       expiresIn: REFRESH_TOKEN_EXPIRES_IN,
     });
-    console.log(foundUser);
+
     return {
+      statusCode: 200,
       accessToken,
       refreshToken,
       userData: {
@@ -142,7 +141,20 @@ const logInUser = async (user_id, password) => {
     };
   } catch (error) {
     console.error(error);
-    return new AppError(500, '로그인에 실패하였습니다');
+    return new AppError(500, 'Internal Server Error');
+  }
+};
+
+// [ 유저 로그아웃 ]
+const logOut = async (req, res) => {
+  try {
+    res.clearCookie('refreshToken');
+    res.clearCookie('accessToken');
+
+    return { statusCode: 200, message: '로그아웃 완료' };
+  } catch (error) {
+    console.error(error);
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
@@ -153,11 +165,39 @@ const validateUniqueUserId = async (user_id) => {
 
     if (foundUser) return new AppError(400, '이미 존재하는 아이디입니다.');
 
-    return { message: '사용할 수 있는 아이디입니다!' };
+    return { statusCode: 200, message: '사용할 수 있는 아이디입니다!' };
   } catch (error) {
     console.error(error);
-    return new AppError(500, '아이디 중복 체크 실패');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
-module.exports = { logInUser, signUpUser, validateUniqueUserId };
+//[비밀번호 체크]
+const validatePassword = async (user_id, password) => {
+  try {
+    const foundUser = await User.findOne({ user_id });
+
+    if (!foundUser) {
+      return new AppError(404, '존재하지 않는 아이디입니다.');
+    }
+
+    const isMatched = await bcrypt.compare(password, foundUser.password);
+
+    if (!isMatched) {
+      return new AppError(400, '비밀번호가 일치하지 않습니다.');
+    }
+
+    return { statusCode: 200, message: '비밀번호가 확인되었습니다.' };
+  } catch (error) {
+    console.error(error);
+    return new AppError(500, 'Internal Server Error');
+  }
+};
+
+module.exports = {
+  logIn,
+  signUp,
+  logOut,
+  validateUniqueUserId,
+  validatePassword,
+};

@@ -17,22 +17,67 @@ const getAllPosts = async (req, res, next) => {
   try {
     const result = await communityService.getAllPosts();
 
+    if (result.statusCode !== 200)
+      return next(new AppError(result.statusCode, result.message));
+
     res.status(200).json({
       message: result.message,
       posts: result.posts,
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '전체 게시글 조회 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+// [ 커뮤니티 게시글 상세페이지 ]
+const getOnePost = async (req, res, next) => {
+  const { postId } = req.params;
+
+  try {
+    const result = await communityService.getOnePost(postId);
+
+    if (result.statusCode !== 200)
+      return next(new AppError(result.statusCode, result.message));
+
+    res.status(200).json({
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+// [ 커뮤니티 게시글 페이징 ]
+const getPagePost = async (req, res, next) => {
+  const { page } = req.query;
+
+  try {
+    const result = await communityService.getPagePost(page);
+
+    if (result.statusCode !== 200)
+      return next(new AppError(result.statusCode, result.message));
+
+    res.status(200).json({
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 //[ 커뮤니티 게시글 등록 ]
 const addPost = async (req, res, next) => {
-  const { userId, title, description, notice } = req.body;
+  const { user_id } = req.user;
+  const imageFile = req.files;
+  const { title, description, notice } = req.body;
 
   const { error } = addPostSchema.validate({
-    userId,
+    user_id,
     title,
     description,
     notice,
@@ -45,13 +90,14 @@ const addPost = async (req, res, next) => {
 
   try {
     const result = await communityService.addPost({
-      userId,
+      user_id,
       title,
       description,
       notice,
+      imageFile,
     });
 
-    if (result.statusCode === 403 || result.statusCode === 404)
+    if (result.statusCode !== 201)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(201).json({
@@ -60,19 +106,20 @@ const addPost = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '게시글 등록 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 //[ (유저,관리자) 커뮤니티 게시글 수정 ]
 // [admin, manager] 는 게시글 공지사항 변경 가능.
 const updatePost = async (req, res, next) => {
+  const { user_id } = req.user;
   const { postId } = req.params;
-  const { userId, title, description, notice } = req.body;
+  const { title, description, notice } = req.body;
 
   const { error } = updatePostSchema.validate({
     postId,
-    userId,
+    user_id,
     title,
     description,
     notice,
@@ -86,13 +133,13 @@ const updatePost = async (req, res, next) => {
   try {
     const result = await communityService.updatePost({
       postId,
-      userId,
+      user_id,
       title,
       description,
       notice,
     });
 
-    if (result.statusCode === 400 || result.statusCode === 403)
+    if (result.statusCode !== 200)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(200).json({
@@ -101,16 +148,16 @@ const updatePost = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '게시물 수정 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 //[ (유저, 관리자) 커뮤니티 게시글 삭제 ]
 const deletePost = async (req, res, next) => {
   const { postId } = req.params;
-  const { userId } = req.body;
+  const { user_id } = req.user;
 
-  const { error } = deletePostSchema.validate({ postId, userId });
+  const { error } = deletePostSchema.validate({ postId, user_id });
 
   if (error) {
     const message = errorMessageHandler(error);
@@ -118,9 +165,9 @@ const deletePost = async (req, res, next) => {
   }
 
   try {
-    const result = await communityService.deletePost(postId, userId);
+    const result = await communityService.deletePost(postId, user_id);
 
-    if (result.statusCode === 400 || result.statusCode === 403)
+    if (result.statusCode !== 204)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(204).json({
@@ -128,13 +175,15 @@ const deletePost = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 // [ 커뮤니티 게시글 댓글 등록 ]
 const addComment = async (req, res, next) => {
   const { postId } = req.params;
-  const { user_id, content } = req.body;
+  const { user_id } = req.user;
+  const { content } = req.body;
 
   const { error } = addCommentSchema.validate({ postId, user_id, content });
 
@@ -146,8 +195,8 @@ const addComment = async (req, res, next) => {
   try {
     const result = await communityService.addComment(postId, user_id, content);
 
-    if (result.statusCode === 404)
-      return next(new AppError(404, result.message));
+    if (result.statusCode !== 201)
+      return next(new AppError(result.statusCode, result.message));
 
     res.status(201).json({
       message: result.message,
@@ -155,13 +204,15 @@ const addComment = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 // [ 커뮤니티 게시글 댓글 수정 ]
 const updateComment = async (req, res, next) => {
   const { postId, commentId } = req.params;
-  const { user_id, content } = req.body;
+  const { user_id } = req.user;
+  const { content } = req.body;
 
   const { error } = updateCommentSchema.validate({
     postId,
@@ -183,7 +234,7 @@ const updateComment = async (req, res, next) => {
       content,
     });
 
-    if (result.statusCode === 403 || result.statusCode === 404)
+    if (result.statusCode !== 200)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(200).json({
@@ -192,14 +243,14 @@ const updateComment = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '댓글 수정 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 // [ 커뮤니티 댓글 삭제 ]
 const deleteComment = async (req, res, next) => {
   const { postId, commentId } = req.params;
-  const { user_id } = req.body;
+  const { user_id } = req.user;
 
   const { error } = deleteCommentSchema.validate({
     postId,
@@ -219,7 +270,7 @@ const deleteComment = async (req, res, next) => {
       user_id,
     });
 
-    if (result.statusCode === 403 || result.statusCode === 404)
+    if (result.statusCode !== 204)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(204).json({
@@ -227,13 +278,15 @@ const deleteComment = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '댓글 삭제 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 module.exports = {
   addPost,
   getAllPosts,
+  getOnePost,
+  getPagePost,
   updatePost,
   deletePost,
   addComment,

@@ -11,9 +11,9 @@ const {
 
 // [ 관리자 ] 유저 전체 정보 조회
 const getAllUserInfo = async (req, res, next) => {
-  const { id } = req.params;
+  const { user_id } = req.user;
 
-  const { error } = getAllUserInfoSchema.validate({ id });
+  const { error } = getAllUserInfoSchema.validate({ user_id });
 
   if (error) {
     const message = errorMessageHandler(error);
@@ -21,9 +21,9 @@ const getAllUserInfo = async (req, res, next) => {
   }
 
   try {
-    const result = await adminService.getAllUserInfo(id);
+    const result = await adminService.getAllUserInfo(user_id);
 
-    if (result.statusCode === 404 || result.statusCode === 403)
+    if (result.statusCode !== 200)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(200).json({
@@ -32,13 +32,14 @@ const getAllUserInfo = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(500, '관리자 정보 조회 실패');
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 // [ 관리자 ] 유저 로그인 정지
 const adminBanUser = async (req, res, next) => {
-  const { user_id, banUserId } = req.body;
+  const { user_id } = req.user;
+  const { banUserId } = req.body;
 
   const { error } = adminBanSchema.validate({ user_id, banUserId });
 
@@ -50,11 +51,7 @@ const adminBanUser = async (req, res, next) => {
   try {
     const result = await adminService.banUser(user_id, banUserId);
 
-    if (
-      result.statusCode === 400 ||
-      result.statusCode === 403 ||
-      result.statusCode === 404
-    )
+    if (result.statusCode !== 200)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(200).json({
@@ -62,16 +59,18 @@ const adminBanUser = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '로그인 정지 실패, 서버 에러'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 // [ 관리자 ] 유저 커뮤니티 정지
 const adminBanCommunity = async (req, res, next) => {
-  const { user_id, banUserId } = req.body;
+  const { user_id } = req.user;
+  const { banUserId } = req.body;
 
   const { error } = adminBanSchema.validate({ user_id, banUserId });
 
+  //안 바꾼 부분
   if (error) {
     const message = errorMessageHandler(error);
     return next(new AppError(400, message));
@@ -80,11 +79,7 @@ const adminBanCommunity = async (req, res, next) => {
   try {
     const result = await adminService.banCommunity(user_id, banUserId);
 
-    if (
-      result.statusCode === 400 ||
-      result.statusCode === 403 ||
-      result.statusCode === 404
-    )
+    if (result.statusCode !== 200)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(200).json({
@@ -92,13 +87,14 @@ const adminBanCommunity = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '커뮤니티 정지 실패, 서버 에러'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 
 // [ 관리자 ] 일반 유저 직위 변경 user -> manager
 const updateUserRole = async (req, res, next) => {
-  const { user_id, updateUser } = req.body;
+  const { user_id } = req.user;
+  const { updateUser } = req.body;
 
   const { error } = updateUserRoleSchema.validate({ user_id, updateUser });
 
@@ -110,11 +106,7 @@ const updateUserRole = async (req, res, next) => {
   try {
     const result = await adminService.updateUserRole(user_id, updateUser);
 
-    if (
-      result.statusCode === 400 ||
-      result.statusCode === 403 ||
-      result.statusCode === 404
-    )
+    if (result.statusCode !== 200)
       return next(new AppError(result.statusCode, result.message));
 
     res.status(200).json({
@@ -122,7 +114,7 @@ const updateUserRole = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError(500, '직위 변경 실패'));
+    return next(new AppError(500, 'Internal Server Error'));
   }
 };
 

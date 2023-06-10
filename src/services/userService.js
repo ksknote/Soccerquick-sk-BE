@@ -12,6 +12,7 @@ const getUser = async (user_id) => {
     if (!foundUser) return new AppError(404, '존재하지 않는 아이디 입니다.');
 
     return {
+      statusCode: 200,
       message: '마이페이지 조회 성공',
       userData: {
         user_id: foundUser.user_id,
@@ -27,38 +28,48 @@ const getUser = async (user_id) => {
     };
   } catch (error) {
     console.error(error);
-    return new AppError(500, '마이페이지 조회 실패');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
 //[ 유저정보 수정 ]
 /** (수정 formData) */
+
+// 기존에 등록되어있던 정보는 예외처리 x
 const updateUser = async (formData) => {
   const { user_id, password, nick_name, email, phone_number } = formData;
   try {
-    const foundUser = await User.findOne({
-      $or: [{ user_id }, { nick_name }, { email }],
-    });
+    const foundUser = await User.findOne({ user_id });
 
     if (!foundUser) {
       return new AppError(404, '존재하지 않는 아이디입니다.');
     }
 
-    if (foundUser.nick_name === nick_name) {
-      return new AppError(400, '이미 존재하는 닉네임입니다.');
-    }
-
-    if (foundUser.email === email) {
-      return new AppError(400, '이미 존재하는 이메일입니다.');
-    }
-
     const updateData = {
-      user_id: user_id,
       password: await bcrypt.hash(password, Number(BCRYPT_SALT_ROUNDS)),
-      nick_name: nick_name,
-      email: email,
-      phone_number: phone_number,
+      phone_number,
     };
+
+    if (foundUser.nick_name !== nick_name) {
+      const existingUser = await User.findOne({ nick_name });
+      if (existingUser) {
+        return new AppError(400, '이미 존재하는 닉네임입니다.');
+      }
+      updateData.nick_name = nick_name;
+    } else {
+      // 기존에 가지고 있던 데이터인 경우.
+      updateData.nick_name = nick_name;
+    }
+
+    if (foundUser.email !== email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return new AppError(400, '이미 존재하는 이메일입니다.');
+      }
+      updateData.email = email;
+    } else {
+      updateData.email = email;
+    }
 
     const updatedUser = await User.findOneAndUpdate(
       { user_id },
@@ -67,12 +78,13 @@ const updateUser = async (formData) => {
     );
 
     return {
+      statusCode: 200,
       message: '회원정보 수정 성공',
       data: updatedUser,
     };
   } catch (error) {
     console.error(error);
-    throw new AppError(500, '회원정보 수정 실패');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
@@ -105,10 +117,10 @@ const deleteUser = async (user_id, password) => {
 
     await User.deleteOne({ user_id });
 
-    return { message: '회원탈퇴 되었습니다.' };
+    return { statusCode: 204, message: '회원탈퇴 되었습니다.' };
   } catch (error) {
     console.error(error);
-    return new AppError(500, '회원탈퇴 실패');
+    return new AppError(500, 'Internal Server Error');
   }
 };
 
