@@ -1,6 +1,8 @@
 # 싸커 퀵 : Soccer quick
 
-![Image Name](../frontend/public//Images/soccerquick.png)
+![Image Name](https://i.imgur.com/Pux771A.png)
+
+<br>
 
 <hr>
 
@@ -10,7 +12,7 @@
 
 <br>
 
-![Image Name](../frontend/public/Images/persona.png)
+![Image Name](https://i.imgur.com/oM0uCKH.png)
 
 <br>
 
