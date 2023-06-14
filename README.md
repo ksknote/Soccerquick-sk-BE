@@ -1,6 +1,6 @@
 # 싸커 퀵 : Soccer quick
 
-<img src="https://i.imgur.com/Pux771A.png" alt="Soccer Quick Logo" width="300" height="200">
+<img src="https://i.imgur.com/Pux771A.png" alt="Soccer Quick Logo" width="500">
 
 <br>
 
