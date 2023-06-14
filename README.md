@@ -1,6 +1,6 @@
 # 싸커 퀵 : Soccer quick
 
-<img src='../frontend/public/Images/soccerquick.png' alt='Soccer quick logo' />
+![Image Name](../frontend/public//Images/soccerquick.png)
 
 <hr>
 
@@ -10,7 +10,7 @@
 
 <br>
 
-<img src='../frontend/public/Images/persona.png' alt='Persona' />
+![Image Name](../frontend/public/Images/persona.png)
 
 <br>
 
