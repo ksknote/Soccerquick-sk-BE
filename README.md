@@ -1,12 +1,27 @@
 # 싸커 퀵 : Soccer quick
 
-(이미지 넣어주세요!)
+<img src='../frontend/public/Images/soccerquick.png' alt='Soccer quick logo' />
+
+<hr>
 
 <br>
 
 ## 페르소나
 
-(이미지 넣어주세요!)
+<br>
+
+<img src='../frontend/public/Images/persona.png' alt='Persona' />
+
+<br>
+
+- 각 매칭 플랫폼에서 제공하는 경기장을 모아보고 싶은 A군
+- 경기장의 위치를 한 눈에 보고 싶은 B양
+- 실력에 따른 소속 팀 / 팀원을 구하고 싶은 C군
+- 각 경기장에 관한 리뷰를 보고 싶은 D양
+
+<br>
+
+<hr>
 
 <br>
 
@@ -166,11 +181,11 @@ S3_BUCKET={S3_BUCKET}
 ```
 master
 ├── dev
-│   ├── feature
-│   │   ├── feature_dw
-│   │   ├── feature_ss
-│   │   ├── feature_sk
-│___│___└── feature_mw
+│   │
+│   ├── feature_dw
+│   ├── feature_ss
+│   ├── feature_sk
+│___│__ feature_mw
 ```
 
 ### BackEnd branch
