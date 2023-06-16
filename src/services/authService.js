@@ -133,6 +133,7 @@ const logIn = async (user_id, password) => {
         email: foundUser.email,
         phone_number: foundUser.phone_number,
         role: foundUser.role,
+        applicant_status: foundUser.applicant_status,
         gender: foundUser.gender,
         profile: foundUser.profile,
         favoritePlaygrounds: foundUser.favoritePlaygrounds,
