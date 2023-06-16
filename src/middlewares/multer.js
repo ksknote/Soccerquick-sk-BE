@@ -1,5 +1,6 @@
 const multer = require('multer');
 const path = require('path');
+const sanitized = require('../utils/decodedUri');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -7,7 +8,10 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     console.log('multer.js:', file);
-    cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+    const sanitizedFilename = sanitized(file.originalname);
+    const decodedFilename = decodeURIComponent(sanitizedFilename);
+    console.log(decodedFilename);
+    cb(null, `${Date.now()}${path.extname(decodedFilename)}`);
   },
 });
 
