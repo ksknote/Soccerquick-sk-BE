@@ -70,6 +70,24 @@ const getOneGroup = async (group_id) => {
   }
 };
 
+// [ 리더 정보 조회 ]
+const getGroupLeader = async (groupId) => {
+  try {
+    const group = await Group.findOne({ group_id: groupId }).populate(
+      'leader.leader_id'
+    );
+    const leader = group.leader.leader_id;
+    return {
+      statusCode: 200,
+      message: '리더 정보 조회 성공',
+      data: leader,
+    };
+  } catch (error) {
+    console.error(error);
+    return new AppError(500, 'Internal Server Error');
+  }
+};
+
 // [ 리더 - 자기 팀 정보 수정 ]
 const updateMyGroup = async (myGroup) => {
   const {
@@ -510,6 +528,7 @@ const deleteGroup = async (groupId, user_id) => {
 module.exports = {
   getAllGroups,
   getOneGroup,
+  getGroupLeader,
   updateMyGroup,
   addGroup,
   userApplicantGroup,
