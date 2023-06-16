@@ -41,6 +41,8 @@ const updateUserInfo = async (req, res, next) => {
   const { user_id } = req.user;
   const { password, nick_name, email, phone_number } = req.body;
   const image = req.file || null;
+  console.log('controller 바디:', req.body);
+  console.log('controller 이미지 :', image);
 
   const { error } = updateUserInfoSchema.validate({
     user_id,

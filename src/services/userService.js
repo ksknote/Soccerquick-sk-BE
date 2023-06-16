@@ -43,7 +43,7 @@ const updateUser = async (formData) => {
   const { user_id, password, nick_name, email, phone_number, image } = formData;
   try {
     const foundUser = await User.findOne({ user_id });
-
+    console.log('userService 이미지: ', image);
     if (!foundUser) {
       return new AppError(404, '존재하지 않는 아이디입니다.');
     }
@@ -76,6 +76,7 @@ const updateUser = async (formData) => {
 
     //이미지 업로드
     if (image) {
+      console.log('if,image 블록:', 'image');
       const { destination, filename } = image;
       const postImage = await fs.promises.readFile(
         `${destination}/${filename}`
@@ -83,6 +84,7 @@ const updateUser = async (formData) => {
       const mimeType = getMimeType(filename);
       const params = createParams(postImage, filename, mimeType);
       const imageUpload = (params) => {
+        console.log('이미지 업로드전 params:', params);
         return new Promise((resolve, reject) => {
           myBucket.upload(params, (err, data) => {
             if (err) {
@@ -94,6 +96,7 @@ const updateUser = async (formData) => {
         });
       };
       const imageUploaded = await imageUpload(params);
+      console.log('업데이트 객체 넣기전 업로드 완료:', imageUploaded);
       updateData.profile = imageUploaded;
       await fs.promises.unlink(`${destination}/${filename}`);
     }
