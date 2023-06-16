@@ -43,7 +43,7 @@ const updateUser = async (formData) => {
   const { user_id, password, nick_name, email, phone_number, image } = formData;
   try {
     const foundUser = await User.findOne({ user_id });
-    console.log('userService 이미지: ', image);
+
     if (!foundUser) {
       return new AppError(404, '존재하지 않는 아이디입니다.');
     }
