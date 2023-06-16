@@ -47,6 +47,27 @@ const getOneGroup = async (req, res, next) => {
   }
 };
 
+// [ 리더 정보 조회 ]
+const getGroupLeader = async (req, res, next) => {
+  const { groupId } = req.params;
+
+  try {
+    const { statusCode, message, data } = await groupService.getGroupLeader(
+      groupId
+    );
+
+    if (statusCode !== 200) return next(new AppError(statusCode, message));
+
+    res.status(200).json({
+      message,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
 //[ 리더 - 팀 정보 수정 ]
 const updateMyGroup = async (req, res, next) => {
   const { groupId } = req.params;
@@ -296,6 +317,7 @@ const deleteGroup = async (req, res, next) => {
 module.exports = {
   getAllGroups,
   getOneGroup,
+  getGroupLeader,
   updateMyGroup,
   addGroup,
   userApplicantGroup,

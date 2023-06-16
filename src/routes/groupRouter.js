@@ -10,6 +10,9 @@ router.get('/', tokenValidator, groupController.getAllGroups);
 // [ 단일 팀 조회 ]
 router.get('/:groupId', tokenValidator, groupController.getOneGroup);
 
+// [ 리더 정보 조회 ]
+router.get('/:groupId/leader', tokenValidator, groupController.getGroupLeader);
+
 // POST
 // [ 팀 등록 ]
 router.post('/', tokenValidator, groupController.addGroup);
