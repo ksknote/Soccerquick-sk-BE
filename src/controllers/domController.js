@@ -4,13 +4,12 @@ const { AppError } = require('../middlewares/errorHandler');
 // [ 전체 구장 조회 ]
 const getAllDoms = async (req, res, next) => {
   try {
-    const result = await domService.getAllDoms();
-    if (result.statusCode !== 200)
-      return next(new AppError(result.statusCode, result.message));
+    const { statusCode, message, data } = await domService.getAllDoms();
+    if (statusCode !== 200) return next(new AppError(statusCode, message));
 
     res.status(200).json({
-      message: result.message,
-      data: result.data,
+      message,
+      data,
     });
   } catch (error) {
     console.error(error);
@@ -20,17 +19,16 @@ const getAllDoms = async (req, res, next) => {
 
 // [ 단일 구장 조회 ]
 const getOneDom = async (req, res, next) => {
-  const { dom_id } = req.params;
+  const { domId } = req.params;
 
   try {
-    const result = await domService.getOneDom(dom_id);
+    const { statusCode, message, data } = await domService.getOneDom(domId);
 
-    if (result.statusCode !== 200)
-      return next(new AppError(result.statusCode, result.message));
+    if (statusCode !== 200) return next(new AppError(statusCode, message));
 
     res.status(200).json({
-      message: result.message,
-      data: result.data,
+      message,
+      data,
     });
   } catch (error) {
     return next(new AppError(500, 'Internal Server Error'));
@@ -42,14 +40,15 @@ const getSearchLocation = async (req, res, next) => {
   const { keywords } = req.query;
 
   try {
-    const result = await domService.getSearchLocation(keywords);
+    const { statusCode, message, data } = await domService.getSearchLocation(
+      keywords
+    );
 
-    if (result.statusCode !== 200)
-      return new AppError(result.statusCode, result.message);
+    if (statusCode !== 200) return new AppError(statusCode, message);
 
     res.status(200).json({
-      message: result.message,
-      data: result.data,
+      message,
+      data,
     });
   } catch (error) {
     console.error(error);
@@ -59,18 +58,20 @@ const getSearchLocation = async (req, res, next) => {
 
 // [ 풋볼장 즐겨찾기 추가 ]
 const addFavoriteDoms = async (req, res, next) => {
-  const { dom_id } = req.params;
+  const { domId } = req.body;
   const { user_id } = req.user;
 
   try {
-    const result = await domService.addFavoriteDoms(dom_id, user_id);
+    const { statusCode, message, data } = await domService.addFavoriteDoms(
+      domId,
+      user_id
+    );
 
-    if (result.statusCode !== 200)
-      return next(new AppError(result.statusCode, result.message));
+    if (statusCode !== 200) return next(new AppError(statusCode, message));
 
     res.status(200).json({
-      message: result.message,
-      data: result.data,
+      message,
+      data,
     });
   } catch (error) {
     console.error(error);
@@ -80,17 +81,19 @@ const addFavoriteDoms = async (req, res, next) => {
 
 // [ 풋볼장 즐겨찾기 삭제 ]
 const removeFavoriteDoms = async (req, res, next) => {
-  const { dom_id } = req.params;
+  const { domId } = req.params;
   const { user_id } = req.user;
 
   try {
-    const result = await domService.removeFavoriteDoms(dom_id, user_id);
+    const { statusCode, message } = await domService.removeFavoriteDoms(
+      domId,
+      user_id
+    );
 
-    if (result.statusCode !== 204)
-      return next(new AppError(result.statusCode, result.message));
+    if (statusCode !== 204) return next(new AppError(statusCode, message));
 
     res.status(204).json({
-      message: result.message,
+      message,
     });
   } catch (error) {
     console.error(error);

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Post, Comment, User, Admin } = require('../model/models/index');
+const { Post, Comment, User } = require('../model/models/index');
 const { AppError } = require('../middlewares/errorHandler');
 const { createPostId, createCommentId } = require('../utils/createIndex');
 const { myBucket, createParams, getMimeType } = require('../awsconfig');
@@ -16,7 +16,7 @@ const getAllPosts = async () => {
     return {
       statusCode: 200,
       message: '전체 게시글 조회 성공',
-      posts: posts,
+      data: posts,
     };
   } catch (error) {
     console.error(error);
@@ -135,32 +135,38 @@ const addPost = async (posts) => {
       }
     }
 
-    const postImageArray = imageFile.map((image) => {
-      const { destination, filename } = image;
+    const postImageArray = await Promise.all(
+      imageFile.map(async (image, i) => {
+        const { destination, filename } = image;
 
-      const postImage = fs.readFileSync(`${destination}/${filename}`);
-      const mimeType = getMimeType(filename);
-      const params = createParams(postImage, filename, mimeType);
-
-      return new Promise((resolve, reject) => {
-        myBucket.upload(params, (err, data) => {
-          if (err) {
-            console.error(err);
-            reject(err);
-            return;
-          }
-
-          resolve(data.Location);
+        const postImage = await fs.promises.readFile(
+          `${destination}/${filename}`
+        );
+        const mimeType = getMimeType(filename);
+        const params = createParams(postImage, filename, mimeType);
+        console.log('이미지 업로드중', i);
+        return new Promise((resolve, reject) => {
+          myBucket.upload(params, (err, data) => {
+            if (err) {
+              console.error(err);
+              reject(err);
+              return;
+            }
+            resolve(data.Location);
+          });
         });
-      });
-    });
+      })
+    );
 
     const urlFormattedArray = await Promise.all(postImageArray);
 
-    imageFile.forEach((image) => {
-      const { destination, filename } = image;
-      fs.unlinkSync(`${destination}/${filename}`);
-    });
+    await Promise.all(
+      imageFile.map(async (image, i) => {
+        const { destination, filename } = image;
+        await fs.promises.unlink(`${destination}/${filename}`);
+        console.log('이미지 삭제중', i);
+      })
+    );
 
     const userObjectId = foundUser._id;
 
@@ -180,7 +186,7 @@ const addPost = async (posts) => {
     return {
       statusCode: 201,
       message: '게시글이 등록되었습니다.',
-      newPost: newPost,
+      data: newPost,
     };
   } catch (error) {
     console.error(error);
@@ -394,6 +400,41 @@ const deleteComment = async (comment) => {
   }
 };
 
+// [ 이미지 업로드 용 ]
+const uploadImage = async (image) => {
+  try {
+    if (!image)
+      return new AppError(400, '이미지 업로드가 정상적으로 되지 않았습니다.');
+
+    const { destination, filename } = image;
+    const postImage = await fs.promises.readFile(`${destination}/${filename}`);
+    const mimeType = getMimeType(filename);
+    const params = createParams(postImage, filename, mimeType);
+    const imageUpload = (params) => {
+      return new Promise((resolve, reject) => {
+        myBucket.upload(params, (err, data) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(data.Location);
+        });
+      });
+    };
+    const imageUploaded = await imageUpload(params);
+    await fs.promises.unlink(`${destination}/${filename}`);
+
+    return {
+      statusCode: 201,
+      message: '이미지 업로드 성공',
+      data: imageUploaded,
+    };
+  } catch (error) {
+    console.error(error);
+    return new AppError();
+  }
+};
+
 module.exports = {
   addPost,
   getAllPosts,
@@ -404,4 +445,5 @@ module.exports = {
   addComment,
   updateComment,
   deleteComment,
+  uploadImage,
 };

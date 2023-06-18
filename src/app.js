@@ -35,6 +35,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(express.static('uploads'));
 
 connectToDatabase()
   .then(async () => {
@@ -55,11 +56,11 @@ connectToDatabase()
     process.exit(1);
   });
 
-app.use('/auths', authRouter);
-app.use('/users', userRouter);
-app.use('/admins', adminRouter);
-app.use('/communities', communityRouter);
-app.use('/doms', domRouter);
-app.use('/reviews', reviewRouter);
-app.use('/groups', groupRouter);
+app.use('/api/v1/auths', authRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/admins', adminRouter);
+app.use('/api/v1/communities', communityRouter);
+app.use('/api/v1/doms', domRouter);
+app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/groups', groupRouter);
 app.use(errorHandler);

@@ -70,10 +70,28 @@ const getOneGroup = async (group_id) => {
   }
 };
 
+// [ 리더 정보 조회 ]
+const getGroupLeader = async (groupId) => {
+  try {
+    const group = await Group.findOne({ group_id: groupId }).populate(
+      'leader.leader_id'
+    );
+    const leader = group.leader.leader_id;
+    return {
+      statusCode: 200,
+      message: '리더 정보 조회 성공',
+      data: leader,
+    };
+  } catch (error) {
+    console.error(error);
+    return new AppError(500, 'Internal Server Error');
+  }
+};
+
 // [ 리더 - 자기 팀 정보 수정 ]
 const updateMyGroup = async (myGroup) => {
   const {
-    group_id,
+    groupId,
     user_id,
     location,
     status,
@@ -92,7 +110,7 @@ const updateMyGroup = async (myGroup) => {
 
     const userObjectId = toString(foundUser._id);
 
-    const foundGroup = await Group.findOne({ group_id });
+    const foundGroup = await Group.findOne({ group_id: groupId });
 
     if (!foundGroup) return new AppError(404, '존재하지 않는 팀 그룹입니다.');
 
@@ -115,7 +133,7 @@ const updateMyGroup = async (myGroup) => {
     };
 
     const newGroup = await Group.findOneAndUpdate(
-      { group_id: group_id },
+      { group_id: groupId },
       { $set: newGroupData },
       { new: true }
     );
@@ -222,7 +240,7 @@ const addGroup = async (group) => {
 // 유저 - [ 팀 신청 ]
 /** (신청 팀그룹 아이디, 유저 데이터) Object */
 const userApplicantGroup = async (user) => {
-  const { group_id, user_id, position, level, contents } = user;
+  const { groupId, user_id, position, level, contents } = user;
 
   try {
     const foundUser = await User.findOne({ user_id });
@@ -233,7 +251,7 @@ const userApplicantGroup = async (user) => {
     const userGender = foundUser.gender;
     const userStatus = foundUser.applicant_status;
 
-    const foundGroup = await Group.findOne({ group_id });
+    const foundGroup = await Group.findOne({ group_id: groupId });
     if (!foundGroup) return new AppError(404, '존재하지 않는 팀 그룹입니다.');
 
     if (foundGroup.status === '모집 완료')
@@ -274,13 +292,13 @@ const userApplicantGroup = async (user) => {
 };
 
 // [ 리더 ] - 유저 신청 수락
-const leaderApplicantAccept = async (group_id, leaderId, user_id) => {
+const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
   try {
     const foundLeader = await User.findOne({ user_id: leaderId });
     if (!foundLeader)
       return new AppError(404, '존재하지 않는 리더 아이디입니다.');
 
-    const foundGroup = await Group.findOne({ group_id });
+    const foundGroup = await Group.findOne({ group_id: groupId });
     if (!foundGroup) return new AppError(404, '존재하지 않는 팀 그룹 입니다.');
     if (foundGroup.status === '모집 완료')
       return new AppError(400, '이미 모집 완료 되었습니다.');
@@ -404,13 +422,13 @@ const leaderApplicantAccept = async (group_id, leaderId, user_id) => {
 };
 
 // [ 리더 ] - 유저 신청 거절
-const leaderApplicantReject = async (group_id, leaderId, user_id) => {
+const leaderApplicantReject = async (groupId, leaderId, user_id) => {
   try {
     const foundLeader = await User.findOne({ user_id: leaderId });
     if (!foundLeader)
       return new AppError(404, '존재하지 않는 리더 아이디입니다.');
 
-    const foundGroup = await Group.findOne({ group_id });
+    const foundGroup = await Group.findOne({ group_id: groupId });
     if (!foundGroup) return new AppError(404, '존재하지 않는 팀 그룹 입니다.');
 
     const foundUser = await User.findOne({ _id: user_id });
@@ -466,12 +484,12 @@ const leaderApplicantReject = async (group_id, leaderId, user_id) => {
 };
 
 // [ 리더, 관리자 ] - 팀 그룹 삭제
-const deleteGroup = async (group_id, user_id) => {
+const deleteGroup = async (groupId, user_id) => {
   try {
     const foundUser = await User.findOne({ user_id });
     if (!foundUser) return new AppError(404, '존재하지 않는 사용자입니다.');
 
-    const foundGroup = await Group.findOne({ group_id });
+    const foundGroup = await Group.findOne({ group_id: groupId });
     if (!foundGroup) return new AppError(404, '존재하지 않는 팀 그룹입니다.');
 
     const userObjectId = toString(foundUser._id);
@@ -499,7 +517,7 @@ const deleteGroup = async (group_id, user_id) => {
       ).exec();
     }
 
-    await Group.deleteOne({ group_id });
+    await Group.deleteOne({ group_id: groupId });
 
     return { statusCode: 204, message: '팀 그룹이 삭제되었습니다.' };
   } catch (error) {
@@ -510,6 +528,7 @@ const deleteGroup = async (group_id, user_id) => {
 module.exports = {
   getAllGroups,
   getOneGroup,
+  getGroupLeader,
   updateMyGroup,
   addGroup,
   userApplicantGroup,
