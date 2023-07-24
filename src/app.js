@@ -26,6 +26,7 @@ const origins = [
   'http://localhost:8800',
   'http://localhost:3000',
   'http://kdt-sw-4-team02.elicecoding.com',
+  'http://43.202.67.216',
 ];
 const corsOptions = {
   origin: origins,
