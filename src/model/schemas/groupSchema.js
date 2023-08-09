@@ -17,6 +17,10 @@ const GroupSchema = new Schema(
         type: String,
         required: true,
       },
+      leader_phone_number: {
+        type: String,
+        required: true,
+      },
     },
     location: {
       type: String,

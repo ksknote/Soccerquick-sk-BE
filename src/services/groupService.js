@@ -16,6 +16,7 @@ const getAllGroups = async () => {
       title: group.title,
       leader_id: group.leader.leader_id,
       leader_name: group.leader.leader_name,
+      leader_phone_number: group.leader.leader_phone_number,
       contents: group.contents,
       location: group.location,
       status: group.status,
@@ -51,6 +52,7 @@ const getOneGroup = async (group_id) => {
       title: foundGroup.title,
       leader_id: foundGroup.leader.leader_id,
       leader_name: foundGroup.leader.leader_name,
+      leader_phone_number: foundGroup.leader.leader_phone_number,
       contents: foundGroup.contents,
       location: foundGroup.location,
       status: foundGroup.status,
@@ -143,6 +145,7 @@ const updateMyGroup = async (myGroup) => {
       title: newGroup.title,
       leader_id: newGroup.leader.leader_id,
       leader_name: newGroup.leader.leader_name,
+      leader_phone_number: newGroup.leader.leader_phone_number,
       contents: newGroup.contents,
       location: newGroup.location,
       status: newGroup.status,
@@ -187,6 +190,7 @@ const addGroup = async (group) => {
 
     const leaderObjectId = foundLeader._id;
     const leaderName = foundLeader.name;
+    const leaderPhoneNumber = foundLeader.phone_number;
 
     const groupId = await createGroupId();
 
@@ -195,6 +199,7 @@ const addGroup = async (group) => {
       leader: {
         leader_id: leaderObjectId,
         leader_name: leaderName,
+        leader_phone_number: leaderPhoneNumber,
       },
       location: location,
       recruitment_count: {
@@ -214,6 +219,7 @@ const addGroup = async (group) => {
       title: createGroup.title,
       leader_id: createGroup.leader.leader_id,
       leader_name: createGroup.leader.leader_name,
+      leader_phone_number: createGroup.leader.leader_phone_number,
       contents: createGroup.contents,
       location: createGroup.location,
       status: createGroup.status,
@@ -248,6 +254,7 @@ const userApplicantGroup = async (user) => {
 
     const userObjectId = foundUser._id;
     const userName = foundUser.name;
+    const userPhoneNumber = foundUser.phone_number;
     const userGender = foundUser.gender;
     const userStatus = foundUser.applicant_status;
 
@@ -274,6 +281,7 @@ const userApplicantGroup = async (user) => {
       id: userObjectId,
       name: userName,
       gender: userGender,
+      phone_number: userPhoneNumber,
       position,
       level,
       contents,
@@ -344,14 +352,14 @@ const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
           throw new AppError(400, '신청 가능한 플레이어 포지션은 0 개 입니다!');
 
         if (user.position !== '골키퍼' && player_count > 0) {
-          user.status = '모집 불가능';
+          // user.status = '모집 불가능';
           acceptArray.push(user);
           applicants.splice(idx, 1);
           player_count -= 1;
           player_current_count += 1;
         }
 
-        foundUser.applicant_status = '모집 불가능';
+        // foundUser.applicant_status = '모집 불가능';
         await foundUser.save();
 
         foundApplicantUser = true;
@@ -378,7 +386,7 @@ const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
 
     await Group.updateOne(
       { _id: foundGroup._id, 'accept.id': userObjectId },
-      { $set: { 'accept.$[elem].status': '모집 불가능' } },
+      // { $set: { 'accept.$[elem].status': '모집 불가능' } },
       { arrayFilters: [{ 'elem.id': userObjectId }] }
     ).exec();
 
@@ -386,7 +394,7 @@ const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
 
     await Group.updateMany(
       { 'applicant.id': userObjectId },
-      { $set: { 'applicant.$[elem].status': '모집 불가능' } },
+      // { $set: { 'applicant.$[elem].status': '모집 불가능' } },
       { arrayFilters: [{ 'elem.id': userObjectId }] }
     ).exec();
 
@@ -395,6 +403,7 @@ const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
       title: foundGroup.title,
       leader_id: foundGroup.leader.leader_id,
       leader_name: foundGroup.leader.leader_name,
+      leader_phone_number: foundGroup.leader.leader_phone_number,
       contents: foundGroup.contents,
       location: foundGroup.location,
       status: foundGroup.status,
