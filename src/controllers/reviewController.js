@@ -69,7 +69,7 @@ const getPageReview = async (req, res, next) => {
 // [ 리뷰 등록 ]
 const addReview = async (req, res, next) => {
   const { user_id } = req.user;
-  const { dom_id, contents } = req.body;
+  const { dom_id, contents, image } = req.body;
 
   const { error } = addReviewSchema.validate({
     user_id,
@@ -86,6 +86,7 @@ const addReview = async (req, res, next) => {
       user_id,
       dom_id,
       contents,
+      image,
     });
 
     if (statusCode !== 201) return next(new AppError(statusCode, message));

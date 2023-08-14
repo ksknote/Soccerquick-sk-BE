@@ -78,6 +78,10 @@ const domSchema = new Schema({
         type: String,
         ref: 'Review.contents',
       },
+      image: {
+        type: String,
+        ref: 'Review.image',
+      },
       user_name: {
         type: String,
         ref: 'Review.name',

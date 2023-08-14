@@ -54,7 +54,7 @@ const getPageReview = async (pageGroup) => {
 // [ 리뷰 등록 ]
 /** ([유저아이디, 풋볼장번호, 작성자이름, 평점, 리뷰내용 ]) */
 const addReview = async (reviews) => {
-  const { user_id, dom_id, contents } = reviews;
+  const { user_id, dom_id, contents, image } = reviews;
 
   try {
     const foundUser = await User.findOne({ user_id });
@@ -77,6 +77,7 @@ const addReview = async (reviews) => {
       ground_id: dom_id,
       name: foundUser.name,
       contents,
+      image,
     };
 
     const newReview = await Review.create(newReviewField);
@@ -86,6 +87,7 @@ const addReview = async (reviews) => {
       dom_id: newReview.dom_id,
       ground_id: newReview.ground_id,
       contents: newReview.contents,
+      image: newReview.image,
       user_name: userName,
       likedreviews: newReview.userslikes,
       user_icon: userIcon,
