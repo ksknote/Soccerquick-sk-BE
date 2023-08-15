@@ -114,8 +114,7 @@ const addReview = async (reviews) => {
 // [ 리뷰 수정 ]
 /** ([리뷰번호, 유저아이디, 평점, 리뷰내용 ]) */
 const updateReview = async (review) => {
-  const { reviewId, user_id, domId, contents } = review;
-
+  const { reviewId, user_id, domId, contents, image } = review;
   try {
     const foundReview = await Review.findOne({ review_id: reviewId });
     if (!foundReview) return new AppError(404, '존재하지 않는 리뷰입니다.');
@@ -130,6 +129,7 @@ const updateReview = async (review) => {
 
     const updatedReviewObj = {
       contents,
+      image,
     };
 
     const updatedReview = await Review.findOneAndUpdate(
@@ -146,6 +146,7 @@ const updateReview = async (review) => {
 
       if (reviewId === review_id) {
         review.contents = contents;
+        review.image = image;
         review.updatedAt = updatedReview.updatedAt;
       }
     });

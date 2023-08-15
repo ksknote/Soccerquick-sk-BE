@@ -105,7 +105,7 @@ const addReview = async (req, res, next) => {
 const updateReview = async (req, res, next) => {
   const { reviewId } = req.params;
   const { user_id } = req.user;
-  const { domId, contents } = req.body;
+  const { domId, contents, image } = req.body;
 
   const { error } = updateReviewSchema.validate({
     reviewId,
@@ -125,6 +125,7 @@ const updateReview = async (req, res, next) => {
       user_id,
       domId,
       contents,
+      image,
     });
 
     if (statusCode !== 200) return next(new AppError(statusCode, message));
