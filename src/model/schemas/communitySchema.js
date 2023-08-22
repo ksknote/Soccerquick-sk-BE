@@ -8,6 +8,16 @@ const PostSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    nick_name: {
+      type: String,
+      ref: 'User.nick_name',
+      required: true,
+    },
+    profile: {
+      type: String,
+      ref: 'User.profile',
+      required: true,
+    },
     post_id: {
       type: String,
       required: true,
@@ -21,9 +31,18 @@ const PostSchema = new Schema(
       type: String,
       required: true,
     },
-    image: [
+    thumbnail: {
+      type: String,
+      required: false,
+    },
+    subject: {
+      type: String,
+      required: false,
+    },
+    hashTags: [
       {
         type: String,
+        required: false,
       },
     ],
     notice: {
@@ -32,6 +51,18 @@ const PostSchema = new Schema(
       default: '일반 게시글',
     },
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
+    like: [
+      {
+        _id: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+        },
+        user_id: {
+          type: String,
+          ref: 'User.user_id',
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -46,6 +77,16 @@ const CommentSchema = new Schema(
     user_id: {
       type: Schema.Types.ObjectId,
       ref: 'User',
+      required: true,
+    },
+    nick_name: {
+      type: String,
+      ref: 'User.nick_name',
+      required: true,
+    },
+    profile: {
+      type: String,
+      ref: 'User.profile',
       required: true,
     },
     post_id: {
