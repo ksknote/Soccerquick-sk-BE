@@ -19,7 +19,7 @@ router.get('/:postId', tokenValidator, communityController.getOnePost);
 router.post(
   '/',
   tokenValidator,
-  imageUpload.array('image', 3),
+  // imageUpload.array('image', 3),
   communityController.addPost
 );
 

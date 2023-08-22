@@ -6,18 +6,25 @@ const { myBucket, createParams, getMimeType } = require('../awsconfig');
 const toString = require('../utils/toString');
 
 // [ 커뮤니티 전체 게시글 조회 ]
-const getAllPosts = async () => {
+const getAllPosts = async (startIdx, endIdx) => {
   try {
     const posts = await Post.find();
 
     if (!posts)
       return new AppError(404, '게시글을 등록해주세요! 존재하지 않습니다.');
-
-    return {
-      statusCode: 200,
-      message: '전체 게시글 조회 성공',
-      data: posts,
-    };
+    const slicedPost = posts.slice(startIdx, endIdx);
+    if (slicedPost.length > 0) {
+      return {
+        statusCode: 200,
+        message: '전체 게시글 조회 성공',
+        data: slicedPost,
+      };
+    } else {
+      return {
+        statusCode: 204,
+        message: '더 이상 게시글이 없습니다.',
+      };
+    }
   } catch (error) {
     console.error(error);
     return new AppError(500, 'Internal Server Error');
@@ -86,13 +93,13 @@ const getPagePost = async (pageGroup) => {
 //[ 커뮤니티 게시글 등록 ]
 /** ([유저아이디, 제목, 본분, 공지사항여부] 객체) */
 const addPost = async (posts) => {
-  const { user_id, title, description, notice, imageFile } = posts;
+  const { user_id, title, description, notice, thumbnail, subject, hashTags } =
+    posts;
 
   try {
     const foundUser = await User.findOne({ user_id });
 
     if (!foundUser) return new AppError(404, '존재하지 않는 아이디입니다.');
-
     const admin_id = foundUser.admin_id;
 
     if (notice === '공지사항' && !admin_id)
@@ -135,50 +142,56 @@ const addPost = async (posts) => {
       }
     }
 
-    const postImageArray = await Promise.all(
-      imageFile.map(async (image, i) => {
-        const { destination, filename } = image;
+    // const postImageArray = await Promise.all(
+    //   imageFile.map(async (image, i) => {
+    //     const { destination, filename } = image;
 
-        const postImage = await fs.promises.readFile(
-          `${destination}/${filename}`
-        );
-        const mimeType = getMimeType(filename);
-        const params = createParams(postImage, filename, mimeType);
-        console.log('이미지 업로드중', i);
-        return new Promise((resolve, reject) => {
-          myBucket.upload(params, (err, data) => {
-            if (err) {
-              console.error(err);
-              reject(err);
-              return;
-            }
-            resolve(data.Location);
-          });
-        });
-      })
-    );
+    //     const postImage = await fs.promises.readFile(
+    //       `${destination}/${filename}`
+    //     );
+    //     const mimeType = getMimeType(filename);
+    //     const params = createParams(postImage, filename, mimeType);
+    //     console.log('이미지 업로드중', i);
+    //     return new Promise((resolve, reject) => {
+    //       myBucket.upload(params, (err, data) => {
+    //         if (err) {
+    //           console.error(err);
+    //           reject(err);
+    //           return;
+    //         }
+    //         resolve(data.Location);
+    //       });
+    //     });
+    //   })
+    // );
 
-    const urlFormattedArray = await Promise.all(postImageArray);
+    // const urlFormattedArray = await Promise.all(postImageArray);
 
-    await Promise.all(
-      imageFile.map(async (image, i) => {
-        const { destination, filename } = image;
-        await fs.promises.unlink(`${destination}/${filename}`);
-        console.log('이미지 삭제중', i);
-      })
-    );
+    // await Promise.all(
+    //   imageFile.map(async (image, i) => {
+    //     const { destination, filename } = image;
+    //     await fs.promises.unlink(`${destination}/${filename}`);
+    //     console.log('이미지 삭제중', i);
+    //   })
+    // );
 
     const userObjectId = foundUser._id;
-
+    const nick_name = foundUser.nick_name;
+    const profile = foundUser.profile;
     const post_id = await createPostId();
 
     const newPostField = {
       user_id: userObjectId,
+      nick_name,
+      profile,
       post_id,
       title,
       description,
       notice,
-      image: urlFormattedArray,
+      // image: urlFormattedArray,
+      thumbnail,
+      subject,
+      hashTags,
     };
 
     const newPost = await Post.create(newPostField);
@@ -277,6 +290,8 @@ const addComment = async (postId, user_id, content) => {
     if (!foundUser) return new AppError(404, '존재하지 않는 사용자입니다.');
 
     const userObjectId = foundUser._id;
+    const nick_name = foundUser.nick_name;
+    const profile = foundUser.profile;
 
     const foundPost = await Post.findOne({ post_id: postId });
 
@@ -289,6 +304,8 @@ const addComment = async (postId, user_id, content) => {
     const createComment = await Comment.create({
       comment_id,
       user_id: userObjectId,
+      nick_name,
+      profile,
       post_id: postObjectId,
       content,
     });

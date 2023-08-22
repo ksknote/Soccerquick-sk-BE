@@ -14,8 +14,15 @@ const {
 
 //[ 커뮤니티 전체 게시글 조회 ]
 const getAllPosts = async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const itemsPerPage = parseInt(req.query.itemsPerPage) || 12;
+  const startIdx = (page - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
   try {
-    const { statusCode, message, data } = await communityService.getAllPosts();
+    const { statusCode, message, data } = await communityService.getAllPosts(
+      startIdx,
+      endIdx
+    );
 
     if (statusCode !== 200) return next(new AppError(statusCode, message));
 
@@ -74,9 +81,8 @@ const getPagePost = async (req, res, next) => {
 //[ 커뮤니티 게시글 등록 ]
 const addPost = async (req, res, next) => {
   const { user_id } = req.user;
-  const imageFile = req.files;
-  const { title, description, notice } = req.body;
-
+  // const imageFile = req.files;
+  const { title, description, notice, thumbnail, subject, hashTags } = req.body;
   const { error } = addPostSchema.validate({
     user_id,
     title,
@@ -95,7 +101,9 @@ const addPost = async (req, res, next) => {
       title,
       description,
       notice,
-      imageFile,
+      thumbnail,
+      subject,
+      hashTags,
     });
 
     if (statusCode !== 201) return next(new AppError(statusCode, message));
@@ -115,7 +123,7 @@ const addPost = async (req, res, next) => {
 const updatePost = async (req, res, next) => {
   const { user_id } = req.user;
   const { postId } = req.params;
-  const { title, description, notice } = req.body;
+  const { title, description, notice, thumbnail, subject, hashTags } = req.body;
 
   const { error } = updatePostSchema.validate({
     postId,
@@ -137,6 +145,9 @@ const updatePost = async (req, res, next) => {
       title,
       description,
       notice,
+      thumbnail,
+      subject,
+      hashTags,
     });
 
     if (statusCode !== 200) return next(new AppError(statusCode, message));
