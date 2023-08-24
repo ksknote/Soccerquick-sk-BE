@@ -195,7 +195,7 @@ const deletePost = async (req, res, next) => {
 const addComment = async (req, res, next) => {
   const { postId } = req.params;
   const { user_id } = req.user;
-  const { content } = req.body;
+  const { content, image } = req.body;
 
   const { error } = addCommentSchema.validate({ postId, user_id, content });
 
@@ -208,7 +208,8 @@ const addComment = async (req, res, next) => {
     const { statusCode, message, data } = await communityService.addComment(
       postId,
       user_id,
-      content
+      content,
+      image
     );
 
     if (statusCode !== 201) return next(new AppError(statusCode, message));
@@ -227,7 +228,7 @@ const addComment = async (req, res, next) => {
 const updateComment = async (req, res, next) => {
   const { postId, commentId } = req.params;
   const { user_id } = req.user;
-  const { content } = req.body;
+  const { content, image } = req.body;
 
   const { error } = updateCommentSchema.validate({
     postId,
@@ -247,6 +248,7 @@ const updateComment = async (req, res, next) => {
       commentId,
       user_id,
       content,
+      image,
     });
 
     if (statusCode !== 200) return next(new AppError(statusCode, message));

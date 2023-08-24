@@ -100,6 +100,10 @@ const CommentSchema = new Schema(
       required: true,
     },
     content: { type: String, required: true },
+    image: {
+      type: String,
+      required: false,
+    },
     reply: [
       {
         reply_id: {

@@ -283,7 +283,7 @@ const deletePost = async (post_id, userId) => {
 };
 
 //[ 커뮤니티 댓글 등록 ]
-const addComment = async (postId, user_id, content) => {
+const addComment = async (postId, user_id, content, image) => {
   try {
     const foundUser = await User.findOne({ user_id });
 
@@ -309,6 +309,7 @@ const addComment = async (postId, user_id, content) => {
       profile,
       post_id: postId,
       content,
+      image,
     });
 
     const commentObjectId = createComment._id;
@@ -330,7 +331,7 @@ const addComment = async (postId, user_id, content) => {
 
 // [ 커뮤니티 댓글 수정 ]
 const updateComment = async (comment) => {
-  const { postId, commentId, user_id, content } = comment;
+  const { postId, commentId, user_id, content, image } = comment;
 
   try {
     const foundPost = await Post.findOne({ post_id: postId });
@@ -361,6 +362,7 @@ const updateComment = async (comment) => {
 
     const updateCommentObj = {
       content: content,
+      image,
     };
 
     const updateComment = await Comment.findOneAndUpdate(
