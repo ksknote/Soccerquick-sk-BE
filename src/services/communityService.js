@@ -304,15 +304,16 @@ const addComment = async (postId, user_id, content) => {
     const createComment = await Comment.create({
       comment_id,
       user_id: userObjectId,
+      userId: user_id,
       nick_name,
       profile,
       post_id: postObjectId,
       content,
     });
 
-    const commentObjectId = createComment._id;
+    // const commentObjectId = createComment._id;
 
-    foundPost.comments.push(commentObjectId);
+    foundPost.comments.push(createComment);
 
     await foundPost.save();
 

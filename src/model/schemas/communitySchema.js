@@ -79,6 +79,11 @@ const CommentSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    userId: {
+      type: String,
+      ref: 'User.user_id',
+      required: true,
+    },
     nick_name: {
       type: String,
       ref: 'User.nick_name',
@@ -95,6 +100,36 @@ const CommentSchema = new Schema(
       required: true,
     },
     content: { type: String, required: true },
+    reply: [
+      {
+        reply_id: {
+          type: String,
+          required: true,
+        },
+        user_id: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        nick_name: {
+          type: String,
+          ref: 'User.nick_name',
+          required: true,
+        },
+        profile: {
+          type: String,
+          ref: 'User.profile',
+          required: true,
+        },
+        comment_id: {
+          type: Schema.Types.ObjectId,
+          ref: 'Post',
+          required: true,
+        },
+        content: { type: String, required: true },
+      },
+      { timestamps: true },
+    ],
   },
   { timestamps: true }
 );
