@@ -95,8 +95,8 @@ const CommentSchema = new Schema(
       required: true,
     },
     post_id: {
-      type: Schema.Types.ObjectId,
-      ref: 'Post',
+      type: String,
+      ref: 'Post.post_id',
       required: true,
     },
     content: { type: String, required: true },

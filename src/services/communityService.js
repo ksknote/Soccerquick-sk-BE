@@ -297,7 +297,7 @@ const addComment = async (postId, user_id, content) => {
 
     if (!foundPost) return new AppError(404, '존재하지 않는 게시글입니다.');
 
-    const postObjectId = foundPost._id;
+    // const postObjectId = foundPost._id;
 
     const comment_id = await createCommentId();
 
@@ -307,13 +307,13 @@ const addComment = async (postId, user_id, content) => {
       userId: user_id,
       nick_name,
       profile,
-      post_id: postObjectId,
+      post_id: postId,
       content,
     });
 
-    // const commentObjectId = createComment._id;
+    const commentObjectId = createComment._id;
 
-    foundPost.comments.push(createComment);
+    foundPost.comments.push(commentObjectId);
 
     await foundPost.save();
 
