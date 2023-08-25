@@ -10,7 +10,7 @@ const {
   addCommentSchema,
   updateCommentSchema,
   deleteCommentSchema,
-  addReplySchema,
+  addCommentReplySchema,
 } = require('../validator/communityValidator');
 
 //[ 커뮤니티 전체 게시글 조회 ]
@@ -299,12 +299,12 @@ const deleteComment = async (req, res, next) => {
 };
 
 // [ 커뮤니티 대댓글 등록]
-const addReply = async (req, res, next) => {
+const addCommentReply = async (req, res, next) => {
   const { postId, commentId } = req.params;
   const { user_id } = req.user;
   const { content, image } = req.body;
 
-  const { error } = addReplySchema.validate({
+  const { error } = addCommentReplySchema.validate({
     postId,
     commentId,
     user_id,
@@ -317,13 +317,14 @@ const addReply = async (req, res, next) => {
   }
 
   try {
-    const { statusCode, message, data } = await communityService.addReply(
-      postId,
-      commentId,
-      user_id,
-      content,
-      image
-    );
+    const { statusCode, message, data } =
+      await communityService.addCommentReply(
+        postId,
+        commentId,
+        user_id,
+        content,
+        image
+      );
 
     if (statusCode !== 201) return next(new AppError(statusCode, message));
 
@@ -365,5 +366,5 @@ module.exports = {
   updateComment,
   deleteComment,
   uploadImage,
-  addReply,
+  addCommentReply,
 };

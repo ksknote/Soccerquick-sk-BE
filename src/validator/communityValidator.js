@@ -52,7 +52,7 @@ const deleteCommentSchema = Joi.object({
 });
 
 // [ 대댓글 등록 ]
-const addReplySchema = Joi.object({
+const addCommentReplySchema = Joi.object({
   postId: Joi.string().label('게시글 번호').required(),
   commentId: Joi.string().label('댓글 번호').required(),
   user_id: Joi.string().label('아이디').required(),
@@ -66,5 +66,5 @@ module.exports = {
   addCommentSchema,
   updateCommentSchema,
   deleteCommentSchema,
-  addReplySchema,
+  addCommentReplySchema,
 };

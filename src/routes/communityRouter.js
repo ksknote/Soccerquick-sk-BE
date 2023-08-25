@@ -60,7 +60,7 @@ router.delete(
 router.post(
   '/:postId/comment/:commentId/reply',
   tokenValidator,
-  communityController.addReply
+  communityController.addCommentReply
 );
 
 module.exports = router;

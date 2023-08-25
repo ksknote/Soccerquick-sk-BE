@@ -108,36 +108,86 @@ const CommentSchema = new Schema(
       {
         reply_id: {
           type: String,
-          required: true,
+          ref: 'CommentReply.reply_id',
         },
         user_id: {
           type: Schema.Types.ObjectId,
-          ref: 'User',
-          required: true,
+          ref: 'CommentReply.user_id',
+        },
+        userId: {
+          type: String,
+          ref: 'CommentReply.userId',
         },
         nick_name: {
           type: String,
-          ref: 'User.nick_name',
-          required: true,
+          ref: 'CommentReply.nick_name',
         },
         profile: {
           type: String,
-          ref: 'User.profile',
-          required: true,
+          ref: 'CommentReply.profile',
         },
         comment_id: {
           type: String,
-          ref: 'Comment.comment_id',
-          required: true,
+          ref: 'CommentReply.comment_id',
         },
         image: {
           type: String,
-          required: false,
+          ref: 'CommentReply.image',
         },
-        content: { type: String, required: true },
+        content: {
+          type: String,
+          ref: 'CommentReply.content',
+        },
+        createdAt: {
+          type: String,
+          ref: 'CommentReply.createdAt',
+        },
+        updatedAt: {
+          type: String,
+          ref: 'CommentReply.updatedAt',
+        },
       },
-      { timestamps: true },
     ],
+  },
+  { timestamps: true }
+);
+
+const CommentReplySchema = new Schema(
+  {
+    reply_id: {
+      type: String,
+      required: true,
+    },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    userId: {
+      type: String,
+      ref: 'User.user_id',
+      required: true,
+    },
+    nick_name: {
+      type: String,
+      ref: 'User.nick_name',
+      required: true,
+    },
+    profile: {
+      type: String,
+      ref: 'User.profile',
+      required: true,
+    },
+    comment_id: {
+      type: String,
+      ref: 'Comment.comment_id',
+      required: true,
+    },
+    image: {
+      type: String,
+      required: false,
+    },
+    content: { type: String, required: true },
   },
   { timestamps: true }
 );
@@ -145,4 +195,5 @@ const CommentSchema = new Schema(
 module.exports = {
   PostSchema,
   CommentSchema,
+  CommentReplySchema,
 };

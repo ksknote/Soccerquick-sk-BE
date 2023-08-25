@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Post, Comment, User } = require('../model/models/index');
+const { Post, Comment, CommentReply, User } = require('../model/models/index');
 const { AppError } = require('../middlewares/errorHandler');
 const {
   createPostId,
@@ -425,21 +425,20 @@ const deleteComment = async (comment) => {
 };
 
 // [커뮤니티 대댓글 등록]
-const addReply = async (postId, commentId, user_id, content, image) => {
+const addCommentReply = async (postId, commentId, user_id, content, image) => {
   try {
     const foundUser = await User.findOne({ user_id });
-
     if (!foundUser) return new AppError(404, '존재하지 않는 사용자입니다.');
-
-    const userObjectId = foundUser._id;
-    const nick_name = foundUser.nick_name;
-    const profile = foundUser.profile;
 
     const foundPost = await Post.findOne({ post_id: postId });
     if (!foundPost) return new AppError(404, '존재하지 않는 게시글입니다.');
 
     const foundComment = await Comment.findOne({ comment_id: commentId });
     if (!foundComment) return new AppError(404, '존재하지 않는 댓글입니다.');
+
+    const userObjectId = foundUser._id;
+    const nick_name = foundUser.nick_name;
+    const profile = foundUser.profile;
 
     const reply_id = await createReplyId();
     const replyObj = {
@@ -453,7 +452,10 @@ const addReply = async (postId, commentId, user_id, content, image) => {
       image,
     };
 
-    foundComment.reply.push(replyObj);
+    const createCommentReply = await CommentReply.create(replyObj);
+
+    foundComment.reply.push(createCommentReply);
+
     await foundComment.save();
 
     return {
@@ -512,6 +514,6 @@ module.exports = {
   addComment,
   updateComment,
   deleteComment,
-  addReply,
+  addCommentReply,
   uploadImage,
 };
