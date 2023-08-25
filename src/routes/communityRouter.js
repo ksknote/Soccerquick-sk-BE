@@ -26,6 +26,13 @@ router.post(
 //[ 커뮤니티 게시글 댓글 등록 ]
 router.post('/:postId/comment', tokenValidator, communityController.addComment);
 
+// [ 커뮤니티 게시글 대댓글 등록]
+router.post(
+  '/:postId/comment/:commentId/reply',
+  tokenValidator,
+  communityController.addCommentReply
+);
+
 //[ 이미지 업로드 ]
 router.post(
   '/uploads',
@@ -54,13 +61,6 @@ router.delete(
   '/:postId/comment/:commentId',
   tokenValidator,
   communityController.deleteComment
-);
-
-// [ 커뮤니티 게시글 대댓글 등록]
-router.post(
-  '/:postId/comment/:commentId/reply',
-  tokenValidator,
-  communityController.addCommentReply
 );
 
 module.exports = router;

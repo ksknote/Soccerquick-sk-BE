@@ -130,6 +130,10 @@ const CommentSchema = new Schema(
           type: String,
           ref: 'CommentReply.comment_id',
         },
+        post_id: {
+          type: String,
+          ref: 'CommentReply.post_id',
+        },
         image: {
           type: String,
           ref: 'CommentReply.image',
@@ -176,6 +180,11 @@ const CommentReplySchema = new Schema(
     profile: {
       type: String,
       ref: 'User.profile',
+      required: true,
+    },
+    post_id: {
+      type: String,
+      ref: 'Post.post_id',
       required: true,
     },
     comment_id: {

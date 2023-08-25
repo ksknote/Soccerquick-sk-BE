@@ -448,6 +448,7 @@ const addCommentReply = async (postId, commentId, user_id, content, image) => {
       nick_name,
       profile,
       comment_id: commentId,
+      post_id: postId,
       content,
       image,
     };
