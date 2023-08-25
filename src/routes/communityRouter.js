@@ -56,4 +56,11 @@ router.delete(
   communityController.deleteComment
 );
 
+// [ 커뮤니티 게시글 대댓글 등록]
+router.post(
+  '/:postId/comment/:commentId/reply',
+  tokenValidator,
+  communityController.addReply
+);
+
 module.exports = router;

@@ -126,9 +126,13 @@ const CommentSchema = new Schema(
           required: true,
         },
         comment_id: {
-          type: Schema.Types.ObjectId,
-          ref: 'Post',
+          type: String,
+          ref: 'Comment.comment_id',
           required: true,
+        },
+        image: {
+          type: String,
+          required: false,
         },
         content: { type: String, required: true },
       },

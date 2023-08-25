@@ -1,7 +1,11 @@
 const fs = require('fs');
 const { Post, Comment, User } = require('../model/models/index');
 const { AppError } = require('../middlewares/errorHandler');
-const { createPostId, createCommentId } = require('../utils/createIndex');
+const {
+  createPostId,
+  createCommentId,
+  createReplyId,
+} = require('../utils/createIndex');
 const { myBucket, createParams, getMimeType } = require('../awsconfig');
 const toString = require('../utils/toString');
 
@@ -420,6 +424,49 @@ const deleteComment = async (comment) => {
   }
 };
 
+// [커뮤니티 대댓글 등록]
+const addReply = async (postId, commentId, user_id, content, image) => {
+  try {
+    const foundUser = await User.findOne({ user_id });
+
+    if (!foundUser) return new AppError(404, '존재하지 않는 사용자입니다.');
+
+    const userObjectId = foundUser._id;
+    const nick_name = foundUser.nick_name;
+    const profile = foundUser.profile;
+
+    const foundPost = await Post.findOne({ post_id: postId });
+    if (!foundPost) return new AppError(404, '존재하지 않는 게시글입니다.');
+
+    const foundComment = await Comment.findOne({ comment_id: commentId });
+    if (!foundComment) return new AppError(404, '존재하지 않는 댓글입니다.');
+
+    const reply_id = await createReplyId();
+    const replyObj = {
+      reply_id,
+      user_id: userObjectId,
+      userId: user_id,
+      nick_name,
+      profile,
+      comment_id: commentId,
+      content,
+      image,
+    };
+
+    foundComment.reply.push(replyObj);
+    await foundComment.save();
+
+    return {
+      statusCode: 201,
+      message: '답글이 등록되었습니다.',
+      data: foundComment,
+    };
+  } catch (error) {
+    console.error(error);
+    return new AppError(500, 'Internal Server Error');
+  }
+};
+
 // [ 이미지 업로드 용 ]
 const uploadImage = async (image) => {
   try {
@@ -465,5 +512,6 @@ module.exports = {
   addComment,
   updateComment,
   deleteComment,
+  addReply,
   uploadImage,
 };
