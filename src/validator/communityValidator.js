@@ -59,6 +59,15 @@ const addCommentReplySchema = Joi.object({
   content: Joi.string().label('댓글 본문').required(),
 });
 
+//[ 대댓글 수정 ]
+const updateCommentReplySchema = Joi.object({
+  postId: Joi.string().label('게시글 번호').required(),
+  commentId: Joi.string().label('댓글 번호').required(),
+  replyId: Joi.string().label('대댓글 번호').required(),
+  user_id: Joi.string().label('아이디').required(),
+  content: Joi.string().label('댓글 본문').required(),
+});
+
 module.exports = {
   addPostSchema,
   updatePostSchema,
@@ -67,4 +76,5 @@ module.exports = {
   updateCommentSchema,
   deleteCommentSchema,
   addCommentReplySchema,
+  updateCommentReplySchema,
 };

@@ -11,6 +11,7 @@ const {
   updateCommentSchema,
   deleteCommentSchema,
   addCommentReplySchema,
+  updateCommentReplySchema,
 } = require('../validator/communityValidator');
 
 //[ 커뮤니티 전체 게시글 조회 ]
@@ -335,7 +336,49 @@ const addCommentReply = async (req, res, next) => {
   }
 };
 
-//[ 이미지 업로드 용 ]
+// [ 커뮤니티 대댓글 수정 ]
+const updateCommentReply = async (req, res, next) => {
+  const { postId, commentId, replyId } = req.params;
+  const { user_id } = req.user;
+  const { content, image } = req.body;
+
+  const { error } = updateCommentReplySchema.validate({
+    postId,
+    commentId,
+    replyId,
+    user_id,
+    content,
+  });
+
+  if (error) {
+    const message = errorMessageHandler(error);
+    return next(new AppError(400, message));
+  }
+
+  try {
+    const { statusCode, message, data } =
+      await communityService.updateCommentReply({
+        postId,
+        commentId,
+        replyId,
+        user_id,
+        content,
+        image,
+      });
+
+    if (statusCode !== 200) return next(new AppError(statusCode, message));
+
+    res.status(200).json({
+      message,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+// [ 이미지 업로드 용 ]
 const uploadImage = async (req, res, next) => {
   const image = req.file || null;
 
@@ -365,6 +408,7 @@ module.exports = {
   addComment,
   updateComment,
   deleteComment,
-  uploadImage,
   addCommentReply,
+  updateCommentReply,
+  uploadImage,
 };

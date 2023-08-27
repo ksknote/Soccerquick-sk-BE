@@ -339,7 +339,7 @@ const updateComment = async (comment) => {
 
   try {
     const foundPost = await Post.findOne({ post_id: postId });
-    if (!foundPost) return new AppError(404, '존재하지 않는 게시글 입니다.');
+    if (!foundPost) return new AppError(404, '존재하지 않는 게시글입니다.');
 
     const postCommentsArray = foundPost.comments;
 
@@ -470,6 +470,56 @@ const addCommentReply = async (postId, commentId, user_id, content, image) => {
   }
 };
 
+// [ 커뮤니티 대댓글 수정 ]
+const updateCommentReply = async (reply) => {
+  const { postId, commentId, replyId, user_id, content, image } = reply;
+
+  try {
+    const foundPost = await Post.findOne({ post_id: postId });
+    if (!foundPost) return new AppError(404, '존재하지 않는 게시글입니다.');
+
+    const foundComment = await Comment.findOne({ comment_id: commentId });
+    if (!foundComment) return new AppError(404, '존재하지 않는 댓글입니다.');
+
+    const foundReply = await CommentReply.findOne({ reply_id: replyId });
+    if (!foundReply) return new AppError(404, '존재하지 않는 답글입니다.');
+
+    const foundUser = await User.findOne({ user_id });
+    if (foundUser) return new AppError(404, '존재하지 않는 사용자입니다.');
+
+    const userObjectId = toString(foundUser._id);
+    const replyUserId = foundreply.user_id;
+
+    if (userObjectId !== replyUserId)
+      return new AppError(403, '댓글 작성자만 수정 가능합니다.');
+
+    const replyObjectId = foundReply._id;
+    const commentReplysArray = foundComment.reply;
+    const foundUserReply = commentReplysArray.find((reply) => {
+      toString(reply._id) === toString(replyObjectId);
+    });
+
+    if (!foundUserReply)
+      return new AppError(404, '답글이 삭제되었거나 존재하지 않습니다.');
+
+    const updateReplyObj = {
+      content,
+      image,
+    };
+
+    const updateReply = await CommentReply.findOneAndUpdate(
+      { reply_id: replyId },
+      { $set: updateReplyObj },
+      { new: true }
+    );
+
+    return { statusCode: 200, message: '답글 수정 성공', data: updateReply };
+  } catch (error) {
+    console.error(error);
+    return new AppError(500, 'Internal Server Error');
+  }
+};
+
 // [ 이미지 업로드 용 ]
 const uploadImage = async (image) => {
   try {
@@ -516,5 +566,6 @@ module.exports = {
   updateComment,
   deleteComment,
   addCommentReply,
+  updateCommentReply,
   uploadImage,
 };

@@ -42,6 +42,9 @@ router.post(
 );
 
 /* PATCH */
+// [ 커뮤니티 게시글 수정 ]
+router.patch('/:postId', tokenValidator, communityController.updatePost);
+
 //[ 커뮤니티 게시글 댓글 수정]
 router.patch(
   '/:postId/comment/:commentId',
@@ -49,8 +52,12 @@ router.patch(
   communityController.updateComment
 );
 
-// [ 커뮤니티 게시글 수정 ]
-router.patch('/:postId', tokenValidator, communityController.updatePost);
+// [ 커뮤니티 게시글 대댓글 수정]
+router.patch(
+  '/:postId/comment/:commentId/reply/:replyId',
+  tokenValidator,
+  communityController.addCommentReply
+);
 
 /* DELETE*/
 // [ 커뮤니티 게시글 삭제 ]
@@ -61,6 +68,13 @@ router.delete(
   '/:postId/comment/:commentId',
   tokenValidator,
   communityController.deleteComment
+);
+
+// [ 커뮤니티 게시글 대댓글 삭제]
+router.patch(
+  '/:postId/comment/:commentId/reply/:replyId',
+  tokenValidator,
+  communityController.addCommentReply
 );
 
 module.exports = router;
