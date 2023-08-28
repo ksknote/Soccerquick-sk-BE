@@ -52,7 +52,16 @@ const getOnePost = async (postId) => {
         if (!foundComment)
           return new AppError(404, '존재하지 않는 댓글입니다.');
 
-        return foundComment;
+        //대댓글 가져오기
+        const replyArray = foundComment.replies;
+        const newReplyArray = await Promise.all(
+          replyArray.map(async (reply) => {
+            const foundReply = await CommentReply.findOne({ _id: reply });
+            return foundReply;
+          })
+        );
+
+        return { comment: foundComment, replies: newReplyArray };
       } catch (error) {
         console.error(error);
         return new AppError(500, 'Internal Server Error');
@@ -66,7 +75,7 @@ const getOnePost = async (postId) => {
       message: '게시글 조회 성공',
       data: {
         post: foundPost,
-        comment: commentsData,
+        comments: commentsData,
       },
     };
   } catch (error) {
@@ -441,7 +450,7 @@ const addCommentReply = async (postId, commentId, user_id, content, image) => {
     const profile = foundUser.profile;
 
     const reply_id = await createReplyId();
-    const replyObj = {
+    const createCommentReply = await CommentReply.create({
       reply_id,
       user_id: userObjectId,
       userId: user_id,
@@ -451,18 +460,17 @@ const addCommentReply = async (postId, commentId, user_id, content, image) => {
       post_id: postId,
       content,
       image,
-    };
+    });
 
-    const createCommentReply = await CommentReply.create(replyObj);
-
-    foundComment.reply.push(createCommentReply);
+    const replyObjectId = createCommentReply._id;
+    foundComment.replies.push(replyObjectId);
 
     await foundComment.save();
 
     return {
       statusCode: 201,
       message: '답글이 등록되었습니다.',
-      data: foundComment,
+      data: createCommentReply,
     };
   } catch (error) {
     console.error(error);
@@ -485,19 +493,19 @@ const updateCommentReply = async (reply) => {
     if (!foundReply) return new AppError(404, '존재하지 않는 답글입니다.');
 
     const foundUser = await User.findOne({ user_id });
-    if (foundUser) return new AppError(404, '존재하지 않는 사용자입니다.');
+    if (!foundUser) return new AppError(404, '존재하지 않는 사용자입니다.');
 
     const userObjectId = toString(foundUser._id);
-    const replyUserId = foundreply.user_id;
+    const replyUserId = toString(foundReply.user_id);
 
     if (userObjectId !== replyUserId)
       return new AppError(403, '댓글 작성자만 수정 가능합니다.');
 
     const replyObjectId = foundReply._id;
-    const commentReplysArray = foundComment.reply;
-    const foundUserReply = commentReplysArray.find((reply) => {
-      toString(reply._id) === toString(replyObjectId);
-    });
+    const commentReplysArray = foundComment.replies;
+    const foundUserReply = commentReplysArray.find(
+      (reply) => toString(reply) === toString(replyObjectId)
+    );
 
     if (!foundUserReply)
       return new AppError(404, '답글이 삭제되었거나 존재하지 않습니다.');

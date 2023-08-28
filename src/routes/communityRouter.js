@@ -56,7 +56,7 @@ router.patch(
 router.patch(
   '/:postId/comment/:commentId/reply/:replyId',
   tokenValidator,
-  communityController.addCommentReply
+  communityController.updateCommentReply
 );
 
 /* DELETE*/
