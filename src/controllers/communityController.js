@@ -12,6 +12,7 @@ const {
   deleteCommentSchema,
   addCommentReplySchema,
   updateCommentReplySchema,
+  deleteCommentReplySchema,
 } = require('../validator/communityValidator');
 
 //[ 커뮤니티 전체 게시글 조회 ]
@@ -378,6 +379,42 @@ const updateCommentReply = async (req, res, next) => {
   }
 };
 
+// [ 커뮤니티 대댓글 삭제 ]
+const deleteCommentReply = async (req, res, next) => {
+  const { postId, commentId, replyId } = req.params;
+  const { user_id } = req.user;
+
+  const { error } = deleteCommentReplySchema.validate({
+    postId,
+    commentId,
+    replyId,
+    user_id,
+  });
+
+  if (error) {
+    const message = errorMessageHandler(error);
+    return next(new AppError(400, message));
+  }
+
+  try {
+    const { statusCode, message } = await communityService.deleteCommentReply({
+      postId,
+      commentId,
+      replyId,
+      user_id,
+    });
+
+    if (statusCode !== 204) return next(new AppError(statusCode, message));
+
+    res.status(204).json({
+      message,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
 // [ 이미지 업로드 용 ]
 const uploadImage = async (req, res, next) => {
   const image = req.file || null;
@@ -410,5 +447,6 @@ module.exports = {
   deleteComment,
   addCommentReply,
   updateCommentReply,
+  deleteCommentReply,
   uploadImage,
 };

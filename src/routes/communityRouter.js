@@ -71,10 +71,10 @@ router.delete(
 );
 
 // [ 커뮤니티 게시글 대댓글 삭제]
-router.patch(
+router.delete(
   '/:postId/comment/:commentId/reply/:replyId',
   tokenValidator,
-  communityController.addCommentReply
+  communityController.deleteCommentReply
 );
 
 module.exports = router;
