@@ -63,6 +63,8 @@ const getOneGroup = async (group_id) => {
       random_matched: foundGroup.random_matched,
       applicant: foundGroup.applicant,
       accept: foundGroup.accept,
+      createdAt: foundGroup.createdAt,
+      updatedAt: foundGroup.updatedAt,
     };
 
     return { statusCode: 200, message: '팀 조회 성공', data: groupData };

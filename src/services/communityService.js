@@ -195,6 +195,7 @@ const addPost = async (posts) => {
 
     const newPostField = {
       user_id: userObjectId,
+      userId: user_id,
       nick_name,
       profile,
       post_id,

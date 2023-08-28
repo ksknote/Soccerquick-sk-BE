@@ -8,6 +8,11 @@ const PostSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    userId: {
+      type: String,
+      ref: 'User.user_id',
+      required: true,
+    },
     nick_name: {
       type: String,
       ref: 'User.nick_name',
