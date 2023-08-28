@@ -104,54 +104,7 @@ const CommentSchema = new Schema(
       type: String,
       required: false,
     },
-    reply: [
-      {
-        reply_id: {
-          type: String,
-          ref: 'CommentReply.reply_id',
-        },
-        user_id: {
-          type: Schema.Types.ObjectId,
-          ref: 'CommentReply.user_id',
-        },
-        userId: {
-          type: String,
-          ref: 'CommentReply.userId',
-        },
-        nick_name: {
-          type: String,
-          ref: 'CommentReply.nick_name',
-        },
-        profile: {
-          type: String,
-          ref: 'CommentReply.profile',
-        },
-        comment_id: {
-          type: String,
-          ref: 'CommentReply.comment_id',
-        },
-        post_id: {
-          type: String,
-          ref: 'CommentReply.post_id',
-        },
-        image: {
-          type: String,
-          ref: 'CommentReply.image',
-        },
-        content: {
-          type: String,
-          ref: 'CommentReply.content',
-        },
-        createdAt: {
-          type: String,
-          ref: 'CommentReply.createdAt',
-        },
-        updatedAt: {
-          type: String,
-          ref: 'CommentReply.updatedAt',
-        },
-      },
-    ],
+    replies: [{ type: Schema.Types.ObjectId, ref: 'CommentReply' }],
   },
   { timestamps: true }
 );
