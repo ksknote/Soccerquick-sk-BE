@@ -224,9 +224,18 @@ const addPost = async (posts) => {
 //[ 커뮤니티 게시글 수정 ]
 /** (게시물 수정 목록 객체) */
 const updatePost = async (post) => {
-  const { postId, userId, title, description, notice } = post;
+  const {
+    postId,
+    user_id,
+    title,
+    description,
+    notice,
+    thumbnail,
+    subject,
+    hashTags,
+  } = post;
   try {
-    const foundUser = await User.findOne({ user_id: userId });
+    const foundUser = await User.findOne({ user_id });
 
     if (!foundUser) return new AppError(400, '존재하지 않는 아이디입니다.');
     if (notice === '공지사항' && !foundUser.admin_id)
@@ -247,6 +256,9 @@ const updatePost = async (post) => {
       user_id: userObjectId,
       title,
       description,
+      thumbnail,
+      subject,
+      hashTags,
       notice,
     };
 
