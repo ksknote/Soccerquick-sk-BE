@@ -10,13 +10,27 @@ const { myBucket, createParams, getMimeType } = require('../awsconfig');
 const toString = require('../utils/toString');
 
 // [ 커뮤니티 전체 게시글 조회 ]
-const getAllPosts = async (startIdx, endIdx) => {
+const getAllPosts = async (keyword, startIdx, endIdx) => {
   try {
-    const posts = await Post.find();
+    let posts = [];
+    if (keyword.length > 0) {
+      posts = await Post.find({
+        $or: [
+          { title: { $regex: keyword, $options: 'i' } },
+          { description: { $regex: keyword, $options: 'i' } },
+          {
+            hashTags: {
+              $elemMatch: { $regex: keyword, $options: 'i' },
+            },
+          },
+        ],
+      });
+    } else {
+      posts = await Post.find();
+    }
 
-    if (!posts)
-      return new AppError(404, '게시글을 등록해주세요! 존재하지 않습니다.');
     const slicedPost = posts.slice(startIdx, endIdx);
+
     if (slicedPost.length > 0) {
       return {
         statusCode: 200,
