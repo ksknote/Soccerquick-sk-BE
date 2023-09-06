@@ -18,6 +18,7 @@ const {
 //[ 커뮤니티 전체 게시글 조회 ]
 const getAllPosts = async (req, res, next) => {
   const keyword = req.query.keyword;
+  const sortType = req.query.sort;
   const page = parseInt(req.query.page) || 1;
   const itemsPerPage = parseInt(req.query.itemsPerPage) || 12;
   const startIdx = (page - 1) * itemsPerPage;
@@ -26,6 +27,7 @@ const getAllPosts = async (req, res, next) => {
   try {
     const { statusCode, message, data } = await communityService.getAllPosts(
       keyword,
+      sortType,
       startIdx,
       endIdx
     );

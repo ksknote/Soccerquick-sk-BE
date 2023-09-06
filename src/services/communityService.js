@@ -10,7 +10,7 @@ const { myBucket, createParams, getMimeType } = require('../awsconfig');
 const toString = require('../utils/toString');
 
 // [ 커뮤니티 전체 게시글 조회 ]
-const getAllPosts = async (keyword, startIdx, endIdx) => {
+const getAllPosts = async (keyword, sortType, startIdx, endIdx) => {
   try {
     let posts = [];
     if (keyword.length > 0) {
@@ -29,7 +29,22 @@ const getAllPosts = async (keyword, startIdx, endIdx) => {
       posts = await Post.find();
     }
 
-    const slicedPost = posts.slice(startIdx, endIdx);
+    let sortedData = [];
+    if (sortType === 'Comment') {
+      sortedData = posts.sort((a, b) => {
+        const commentA = a.comments.length;
+        const commentB = b.comments.length;
+        return commentB - commentA;
+      });
+    } else {
+      sortedData = posts.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+      });
+    }
+
+    const slicedPost = sortedData.slice(startIdx, endIdx);
 
     if (slicedPost.length > 0) {
       return {
