@@ -571,41 +571,6 @@ const updateCommentReply = async (reply) => {
   }
 };
 
-// [ 이미지 업로드 용 ]
-const uploadImage = async (image) => {
-  try {
-    if (!image)
-      return new AppError(400, '이미지 업로드가 정상적으로 되지 않았습니다.');
-
-    const { destination, filename } = image;
-    const postImage = await fs.promises.readFile(`${destination}/${filename}`);
-    const mimeType = getMimeType(filename);
-    const params = createParams(postImage, filename, mimeType);
-    const imageUpload = (params) => {
-      return new Promise((resolve, reject) => {
-        myBucket.upload(params, (err, data) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(data.Location);
-        });
-      });
-    };
-    const imageUploaded = await imageUpload(params);
-    await fs.promises.unlink(`${destination}/${filename}`);
-
-    return {
-      statusCode: 201,
-      message: '이미지 업로드 성공',
-      data: imageUploaded,
-    };
-  } catch (error) {
-    console.error(error);
-    return new AppError();
-  }
-};
-
 // [ 커뮤니티 대댓글 삭제 ]
 const deleteCommentReply = async (comment) => {
   const { postId, commentId, replyId, user_id } = comment;
@@ -651,6 +616,103 @@ const deleteCommentReply = async (comment) => {
   }
 };
 
+// [ 커뮤니티 게시글 좋아요 ]
+const addLikePosts = async (postId, user_id) => {
+  try {
+    const foundUser = await User.findOne({ user_id });
+
+    if (!foundUser) return new AppError(404, '존재하지 않는 아이디입니다.');
+
+    const userObjectId = foundUser._id.toString();
+
+    const foundPost = await Post.findOne({ post_id: postId });
+
+    if (!foundPost) return new AppError(404, '존재하지 않는 게시글입니다.');
+
+    const likesArray = foundPost.like;
+
+    const filteredUserslike = likesArray.filter(
+      (like) => like._id.toString() === userObjectId
+    );
+
+    //좋아요 취소
+    if (filteredUserslike.length > 0) {
+      [...likesArray].forEach((like, idx) => {
+        if (like._id.toString() === userObjectId) likesArray.splice(idx, 1);
+      });
+
+      foundPost.like = likesArray;
+
+      await foundPost.save();
+
+      foundUser.likePosts.pull(postId);
+
+      await foundUser.save();
+
+      return {
+        statusCode: 200,
+        message: '좋아요가 취소되었습니다.',
+        data: foundPost,
+      };
+    }
+
+    // 좋아요 추가
+    likesArray.push({ _id: userObjectId, user_id: user_id });
+
+    foundPost.like = likesArray;
+
+    await foundPost.save();
+
+    foundUser.likePosts.push(postId);
+
+    await foundUser.save();
+
+    return {
+      statusCode: 200,
+      message: '좋아요!',
+      data: foundPost,
+    };
+  } catch (error) {
+    console.error(error);
+    return new AppError(500, 'Internal Server Error');
+  }
+};
+
+// [ 이미지 업로드 용 ]
+const uploadImage = async (image) => {
+  try {
+    if (!image)
+      return new AppError(400, '이미지 업로드가 정상적으로 되지 않았습니다.');
+
+    const { destination, filename } = image;
+    const postImage = await fs.promises.readFile(`${destination}/${filename}`);
+    const mimeType = getMimeType(filename);
+    const params = createParams(postImage, filename, mimeType);
+    const imageUpload = (params) => {
+      return new Promise((resolve, reject) => {
+        myBucket.upload(params, (err, data) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(data.Location);
+        });
+      });
+    };
+    const imageUploaded = await imageUpload(params);
+    await fs.promises.unlink(`${destination}/${filename}`);
+
+    return {
+      statusCode: 201,
+      message: '이미지 업로드 성공',
+      data: imageUploaded,
+    };
+  } catch (error) {
+    console.error(error);
+    return new AppError();
+  }
+};
+
 module.exports = {
   addPost,
   getAllPosts,
@@ -664,5 +726,6 @@ module.exports = {
   addCommentReply,
   updateCommentReply,
   deleteCommentReply,
+  addLikePosts,
   uploadImage,
 };

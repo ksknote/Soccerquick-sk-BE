@@ -420,6 +420,30 @@ const deleteCommentReply = async (req, res, next) => {
   }
 };
 
+// [ 커뮤니티 게시글 좋아요 ]
+
+const addLikePosts = async (req, res, next) => {
+  const { postId } = req.body;
+  const { user_id } = req.user;
+
+  try {
+    const { statusCode, message, data } = await communityService.addLikePosts(
+      postId,
+      user_id
+    );
+
+    if (statusCode !== 200) return next(new AppError(statusCode, message));
+
+    res.status(200).json({
+      message,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
 // [ 이미지 업로드 용 ]
 const uploadImage = async (req, res, next) => {
   const image = req.file || null;
@@ -453,5 +477,6 @@ module.exports = {
   addCommentReply,
   updateCommentReply,
   deleteCommentReply,
+  addLikePosts,
   uploadImage,
 };

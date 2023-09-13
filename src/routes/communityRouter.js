@@ -23,6 +23,9 @@ router.post(
   communityController.addPost
 );
 
+// [ 커뮤니티 게시글 좋아요 ]
+router.post('/like', tokenValidator, communityController.addLikePosts);
+
 //[ 커뮤니티 게시글 댓글 등록 ]
 router.post('/:postId/comment', tokenValidator, communityController.addComment);
 

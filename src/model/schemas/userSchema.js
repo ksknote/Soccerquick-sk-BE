@@ -71,6 +71,7 @@ const UserSchema = new Schema(
       type: Date,
       default: null,
     },
+    likePosts: [{ type: String, ref: 'Post.post_id' }],
   },
   { timestamps: true }
 );
