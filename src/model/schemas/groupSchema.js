@@ -22,7 +22,11 @@ const GroupSchema = new Schema(
         required: true,
       },
     },
-    location: {
+    region: {
+      type: String,
+      required: true,
+    },
+    city: {
       type: String,
       required: true,
     },

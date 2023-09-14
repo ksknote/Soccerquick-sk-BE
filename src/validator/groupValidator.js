@@ -4,7 +4,8 @@ const Joi = require('joi');
 const addGroupSchema = Joi.object({
   title: Joi.string().label('팀 모집 글 제목').required(),
   leader_id: Joi.string().label('리더 아이디').required(),
-  location: Joi.string().label('지역').required(),
+  region: Joi.string().label('경기 지역'),
+  city: Joi.string().label('경기 도시'),
   gk_count: Joi.number().label('구하는 골키퍼 수').required(),
   player_count: Joi.number().label('구하는 플레이어 수').required(),
   gk_current_count: Joi.number().label('현재 골키퍼 수').required(),
@@ -16,7 +17,8 @@ const addGroupSchema = Joi.object({
 const updateMyGroupSchema = Joi.object({
   groupId: Joi.string().label('그룹 아이디').required(),
   user_id: Joi.string().label('리더 아이디').required(),
-  location: Joi.string().label('경기 위치'),
+  region: Joi.string().label('경기 지역'),
+  city: Joi.string().label('경기 도시'),
   status: Joi.string().label('모집 상태'),
   gk_count: Joi.string().label('모집하는 골키퍼 수'),
   player_count: Joi.string().label('모집하는 플레이어 수'),

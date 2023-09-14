@@ -73,7 +73,8 @@ const updateMyGroup = async (req, res, next) => {
   const { groupId } = req.params;
   const { user_id } = req.user;
   const {
-    location,
+    region,
+    city,
     status,
     gk_count,
     player_count,
@@ -86,7 +87,8 @@ const updateMyGroup = async (req, res, next) => {
   const { error } = updateMyGroupSchema.validate({
     groupId,
     user_id,
-    location,
+    region,
+    city,
     status,
     gk_count,
     player_count,
@@ -105,7 +107,8 @@ const updateMyGroup = async (req, res, next) => {
     const { statusCode, message, data } = await groupService.updateMyGroup({
       groupId,
       user_id,
-      location,
+      region,
+      city,
       status,
       gk_count,
       player_count,
@@ -132,7 +135,8 @@ const addGroup = async (req, res, next) => {
   const leader_id = req.user.user_id;
   const {
     title,
-    location,
+    region,
+    city,
     gk_count,
     player_count,
     gk_current_count,
@@ -143,7 +147,8 @@ const addGroup = async (req, res, next) => {
   const { error } = addGroupSchema.validate({
     title,
     leader_id,
-    location,
+    region,
+    city,
     gk_count,
     player_count,
     gk_current_count,
@@ -159,7 +164,8 @@ const addGroup = async (req, res, next) => {
   try {
     const { statusCode, message, data } = await groupService.addGroup({
       leader_id,
-      location,
+      region,
+      city,
       gk_count,
       player_count,
       gk_current_count,
