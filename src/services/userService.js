@@ -15,17 +15,23 @@ const getUser = async (user_id) => {
 
     return {
       statusCode: 200,
-      message: '마이페이지 조회 성공',
+      message: '유저정보 조회 성공',
       data: {
         user_id: foundUser.user_id,
         name: foundUser.name,
         nick_name: foundUser.nick_name,
         email: foundUser.email,
         phone_number: foundUser.phone_number,
-        favoritePlaygrounds: foundUser.favoritePlaygrounds,
         role: foundUser.role,
+        applicant_status: foundUser.applicant_status,
         gender: foundUser.gender,
         profile: foundUser.profile,
+        favoritePlaygrounds: foundUser.favoritePlaygrounds,
+        login_banned: foundUser.login_banned,
+        login_banEndDate: foundUser.login_banEndDate,
+        community_banned: foundUser.community_banned,
+        community_banEndData: foundUser.community_banEndDate,
+        likePosts: foundUser.likePosts,
         createdAt: foundUser.createdAt,
       },
     };

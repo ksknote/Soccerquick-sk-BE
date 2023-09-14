@@ -141,6 +141,7 @@ const logIn = async (user_id, password) => {
         login_banEndDate: foundUser.login_banEndDate,
         community_banned: foundUser.community_banned,
         community_banEndData: foundUser.community_banEndDate,
+        likePosts: foundUser.likePosts,
         createdAt: foundUser.createdAt,
       },
     };
