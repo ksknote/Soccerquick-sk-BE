@@ -4,37 +4,46 @@ const { createGroupId } = require('../utils/createIndex');
 const toString = require('../utils/toString');
 
 // [ 전체 팀 그룹 조회 ]
-const getAllGroups = async () => {
+const getAllGroups = async (status, region, city, startIdx, endIdx) => {
   try {
+    const filteringOption = {
+      status: status,
+      region: region,
+      city: city,
+    };
+
     const foundGroup = await Group.find();
 
     if (!foundGroup)
       return new AppError(404, '등록된 팀 그룹이 존재하지 않습니다.');
 
-    const formattedGroups = foundGroup.map((group) => ({
-      group_id: group.group_id,
-      title: group.title,
-      leader_id: group.leader.leader_id,
-      leader_name: group.leader.leader_name,
-      leader_phone_number: group.leader.leader_phone_number,
-      contents: group.contents,
-      region: group.region,
-      city: group.city,
-      status: group.status,
-      gk_count: group.recruitment_count.gk_count,
-      player_count: group.recruitment_count.player_count,
-      gk_current_count: group.recruitment_count.gk_current_count,
-      player_current_count: group.recruitment_count.player_current_count,
-      random_matched: group.random_matched,
-      applicant: group.applicant,
-      accept: group.accept,
-    }));
+    const filteredData = foundGroup.filter((team) => {
+      const optionKeys = Object.keys(filteringOption);
+      for (let key of optionKeys) {
+        if (!filteringOption[key]) continue;
+        if (filteringOption[key] === '전체') continue;
+        if (team[key] !== filteringOption[key]) {
+          return false;
+        } else continue;
+      }
+      return true;
+    });
 
-    return {
-      statusCode: 200,
-      message: '전체 팀 그룹 목록 조회 성공',
-      data: formattedGroups,
-    };
+    const recentFilteredData = filteredData.reverse();
+    const slicedPost = recentFilteredData.slice(startIdx, endIdx);
+
+    if (slicedPost.length > 0) {
+      return {
+        statusCode: 200,
+        message: '전체 게시글 조회 성공',
+        data: slicedPost,
+      };
+    } else {
+      return {
+        statusCode: 204,
+        message: '더 이상 게시글이 없습니다.',
+      };
+    }
   } catch (error) {
     console.error(error);
     return new AppError(500, 'Internal Server Error');

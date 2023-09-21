@@ -12,9 +12,23 @@ const {
 
 // [ 전체 팀 그룹 조회 ]
 const getAllGroups = async (req, res, next) => {
-  try {
-    const { statusCode, message, data } = await groupService.getAllGroups();
+  const status = req.query.status;
+  const region = req.query.region;
+  const city = req.query.city;
 
+  const page = parseInt(req.query.page) || 1;
+  const itemsPerPage = parseInt(req.query.itemsPerPage) || 8;
+  const startIdx = (page - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+
+  try {
+    const { statusCode, message, data } = await groupService.getAllGroups(
+      status,
+      region,
+      city,
+      startIdx,
+      endIdx
+    );
     if (statusCode !== 200) return next(new AppError(statusCode, message));
 
     res.status(200).json({
