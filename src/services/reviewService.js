@@ -75,7 +75,8 @@ const addReview = async (reviews) => {
       user_id: userObjectId,
       dom_id: domObjectId,
       ground_id: dom_id,
-      name: foundUser.name,
+      user_name: foundUser.name,
+      user_icon: userIcon,
       contents,
       image,
     };
@@ -89,7 +90,7 @@ const addReview = async (reviews) => {
       contents: newReview.contents,
       image: newReview.image,
       user_name: userName,
-      likedreviews: newReview.userslikes,
+      likedreviews: newReview.likedreviews,
       user_icon: userIcon,
       createdAt: newReview.createdAt,
       updatedAt: newReview.updatedAt,
@@ -209,7 +210,7 @@ const addLikesReview = async (reviewId, user_id) => {
     if (!foundReview) return new AppError(404, '리뷰를 찾을 수 없습니다.');
 
     const domObjectId = foundReview.dom_id;
-    const usersLikesArray = foundReview.userslikes;
+    const usersLikesArray = foundReview.likedreviews;
     const filteredUsersReviews = usersLikesArray.filter(
       (user) => user._id.toString() === userObjectId
     );
@@ -233,7 +234,7 @@ const addLikesReview = async (reviewId, user_id) => {
       _id: userObjectId,
       user_id,
     });
-    foundReview.userslikes = usersLikesArray;
+    foundReview.likedreviews = usersLikesArray;
     await foundReview.save();
 
     return {
@@ -260,7 +261,7 @@ const removeLikesReview = async (reviewId, user_id) => {
     if (!foundReview) return new AppError(404, '존재하지 않는 리뷰 입니다.');
 
     const domObjectId = foundReview.dom_id;
-    const usersLikesArray = foundReview.userslikes;
+    const usersLikesArray = foundReview.likedreviews;
 
     const filteredUsersReviews = usersLikesArray.filter(
       (user) => user._id.toString() !== userObjectId
@@ -288,7 +289,7 @@ const removeLikesReview = async (reviewId, user_id) => {
 
     await foundDom.save();
 
-    foundReview.userslikes = usersLikesArray;
+    foundReview.likedreviews = usersLikesArray;
     await foundReview.save();
 
     return {
