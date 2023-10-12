@@ -51,6 +51,31 @@ const deleteCommentSchema = Joi.object({
   user_id: Joi.string().label('아이디').required(),
 });
 
+// [ 대댓글 등록 ]
+const addCommentReplySchema = Joi.object({
+  postId: Joi.string().label('게시글 번호').required(),
+  commentId: Joi.string().label('댓글 번호').required(),
+  user_id: Joi.string().label('아이디').required(),
+  content: Joi.string().label('댓글 본문').required(),
+});
+
+//[ 대댓글 수정 ]
+const updateCommentReplySchema = Joi.object({
+  postId: Joi.string().label('게시글 번호').required(),
+  commentId: Joi.string().label('댓글 번호').required(),
+  replyId: Joi.string().label('대댓글 번호').required(),
+  user_id: Joi.string().label('아이디').required(),
+  content: Joi.string().label('댓글 본문').required(),
+});
+
+// [ 대댓글 삭제 ]
+const deleteCommentReplySchema = Joi.object({
+  postId: Joi.string().label('게시글 번호').required(),
+  commentId: Joi.string().label('댓글 번호').required(),
+  replyId: Joi.string().label('대댓글 번호').required(),
+  user_id: Joi.string().label('아이디').required(),
+});
+
 module.exports = {
   addPostSchema,
   updatePostSchema,
@@ -58,4 +83,7 @@ module.exports = {
   addCommentSchema,
   updateCommentSchema,
   deleteCommentSchema,
+  addCommentReplySchema,
+  updateCommentReplySchema,
+  deleteCommentReplySchema,
 };

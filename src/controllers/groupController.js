@@ -12,9 +12,23 @@ const {
 
 // [ 전체 팀 그룹 조회 ]
 const getAllGroups = async (req, res, next) => {
-  try {
-    const { statusCode, message, data } = await groupService.getAllGroups();
+  const status = req.query.status;
+  const region = req.query.region;
+  const city = req.query.city;
 
+  const page = parseInt(req.query.page) || 1;
+  const itemsPerPage = parseInt(req.query.itemsPerPage) || 8;
+  const startIdx = (page - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+
+  try {
+    const { statusCode, message, data } = await groupService.getAllGroups(
+      status,
+      region,
+      city,
+      startIdx,
+      endIdx
+    );
     if (statusCode !== 200) return next(new AppError(statusCode, message));
 
     res.status(200).json({
@@ -73,7 +87,8 @@ const updateMyGroup = async (req, res, next) => {
   const { groupId } = req.params;
   const { user_id } = req.user;
   const {
-    location,
+    region,
+    city,
     status,
     gk_count,
     player_count,
@@ -86,7 +101,8 @@ const updateMyGroup = async (req, res, next) => {
   const { error } = updateMyGroupSchema.validate({
     groupId,
     user_id,
-    location,
+    region,
+    city,
     status,
     gk_count,
     player_count,
@@ -105,7 +121,8 @@ const updateMyGroup = async (req, res, next) => {
     const { statusCode, message, data } = await groupService.updateMyGroup({
       groupId,
       user_id,
-      location,
+      region,
+      city,
       status,
       gk_count,
       player_count,
@@ -132,7 +149,8 @@ const addGroup = async (req, res, next) => {
   const leader_id = req.user.user_id;
   const {
     title,
-    location,
+    region,
+    city,
     gk_count,
     player_count,
     gk_current_count,
@@ -143,7 +161,8 @@ const addGroup = async (req, res, next) => {
   const { error } = addGroupSchema.validate({
     title,
     leader_id,
-    location,
+    region,
+    city,
     gk_count,
     player_count,
     gk_current_count,
@@ -159,7 +178,8 @@ const addGroup = async (req, res, next) => {
   try {
     const { statusCode, message, data } = await groupService.addGroup({
       leader_id,
-      location,
+      region,
+      city,
       gk_count,
       player_count,
       gk_current_count,

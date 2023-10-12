@@ -10,12 +10,27 @@ const {
   addCommentSchema,
   updateCommentSchema,
   deleteCommentSchema,
+  addCommentReplySchema,
+  updateCommentReplySchema,
+  deleteCommentReplySchema,
 } = require('../validator/communityValidator');
 
 //[ 커뮤니티 전체 게시글 조회 ]
 const getAllPosts = async (req, res, next) => {
+  const keyword = req.query.keyword;
+  const sortType = req.query.sort;
+  const page = parseInt(req.query.page) || 1;
+  const itemsPerPage = parseInt(req.query.itemsPerPage) || 12;
+  const startIdx = (page - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+
   try {
-    const { statusCode, message, data } = await communityService.getAllPosts();
+    const { statusCode, message, data } = await communityService.getAllPosts(
+      keyword,
+      sortType,
+      startIdx,
+      endIdx
+    );
 
     if (statusCode !== 200) return next(new AppError(statusCode, message));
 
@@ -74,9 +89,8 @@ const getPagePost = async (req, res, next) => {
 //[ 커뮤니티 게시글 등록 ]
 const addPost = async (req, res, next) => {
   const { user_id } = req.user;
-  const imageFile = req.files;
-  const { title, description, notice } = req.body;
-
+  // const imageFile = req.files;
+  const { title, description, notice, thumbnail, subject, hashTags } = req.body;
   const { error } = addPostSchema.validate({
     user_id,
     title,
@@ -95,7 +109,9 @@ const addPost = async (req, res, next) => {
       title,
       description,
       notice,
-      imageFile,
+      thumbnail,
+      subject,
+      hashTags,
     });
 
     if (statusCode !== 201) return next(new AppError(statusCode, message));
@@ -115,7 +131,7 @@ const addPost = async (req, res, next) => {
 const updatePost = async (req, res, next) => {
   const { user_id } = req.user;
   const { postId } = req.params;
-  const { title, description, notice } = req.body;
+  const { title, description, notice, thumbnail, subject, hashTags } = req.body;
 
   const { error } = updatePostSchema.validate({
     postId,
@@ -137,6 +153,9 @@ const updatePost = async (req, res, next) => {
       title,
       description,
       notice,
+      thumbnail,
+      subject,
+      hashTags,
     });
 
     if (statusCode !== 200) return next(new AppError(statusCode, message));
@@ -184,7 +203,7 @@ const deletePost = async (req, res, next) => {
 const addComment = async (req, res, next) => {
   const { postId } = req.params;
   const { user_id } = req.user;
-  const { content } = req.body;
+  const { content, image } = req.body;
 
   const { error } = addCommentSchema.validate({ postId, user_id, content });
 
@@ -197,7 +216,8 @@ const addComment = async (req, res, next) => {
     const { statusCode, message, data } = await communityService.addComment(
       postId,
       user_id,
-      content
+      content,
+      image
     );
 
     if (statusCode !== 201) return next(new AppError(statusCode, message));
@@ -216,7 +236,7 @@ const addComment = async (req, res, next) => {
 const updateComment = async (req, res, next) => {
   const { postId, commentId } = req.params;
   const { user_id } = req.user;
-  const { content } = req.body;
+  const { content, image } = req.body;
 
   const { error } = updateCommentSchema.validate({
     postId,
@@ -236,6 +256,7 @@ const updateComment = async (req, res, next) => {
       commentId,
       user_id,
       content,
+      image,
     });
 
     if (statusCode !== 200) return next(new AppError(statusCode, message));
@@ -284,7 +305,146 @@ const deleteComment = async (req, res, next) => {
   }
 };
 
-//[ 이미지 업로드 용 ]
+// [ 커뮤니티 대댓글 등록]
+const addCommentReply = async (req, res, next) => {
+  const { postId, commentId } = req.params;
+  const { user_id } = req.user;
+  const { content, image } = req.body;
+
+  const { error } = addCommentReplySchema.validate({
+    postId,
+    commentId,
+    user_id,
+    content,
+  });
+
+  if (error) {
+    const message = errorMessageHandler(error);
+    return next(new AppError(400, message));
+  }
+
+  try {
+    const { statusCode, message, data } =
+      await communityService.addCommentReply(
+        postId,
+        commentId,
+        user_id,
+        content,
+        image
+      );
+
+    if (statusCode !== 201) return next(new AppError(statusCode, message));
+
+    res.status(201).json({ message, data });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+// [ 커뮤니티 대댓글 수정 ]
+const updateCommentReply = async (req, res, next) => {
+  const { postId, commentId, replyId } = req.params;
+  const { user_id } = req.user;
+  const { content, image } = req.body;
+
+  const { error } = updateCommentReplySchema.validate({
+    postId,
+    commentId,
+    replyId,
+    user_id,
+    content,
+  });
+
+  if (error) {
+    const message = errorMessageHandler(error);
+    return next(new AppError(400, message));
+  }
+
+  try {
+    const { statusCode, message, data } =
+      await communityService.updateCommentReply({
+        postId,
+        commentId,
+        replyId,
+        user_id,
+        content,
+        image,
+      });
+
+    if (statusCode !== 200) return next(new AppError(statusCode, message));
+
+    res.status(200).json({
+      message,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+// [ 커뮤니티 대댓글 삭제 ]
+const deleteCommentReply = async (req, res, next) => {
+  const { postId, commentId, replyId } = req.params;
+  const { user_id } = req.user;
+
+  const { error } = deleteCommentReplySchema.validate({
+    postId,
+    commentId,
+    replyId,
+    user_id,
+  });
+
+  if (error) {
+    const message = errorMessageHandler(error);
+    return next(new AppError(400, message));
+  }
+
+  try {
+    const { statusCode, message } = await communityService.deleteCommentReply({
+      postId,
+      commentId,
+      replyId,
+      user_id,
+    });
+
+    if (statusCode !== 204) return next(new AppError(statusCode, message));
+
+    res.status(204).json({
+      message,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+// [ 커뮤니티 게시글 좋아요 ]
+
+const addLikePosts = async (req, res, next) => {
+  const { postId } = req.body;
+  const { user_id } = req.user;
+
+  try {
+    const { statusCode, message, data } = await communityService.addLikePosts(
+      postId,
+      user_id
+    );
+
+    if (statusCode !== 200) return next(new AppError(statusCode, message));
+
+    res.status(200).json({
+      message,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(500, 'Internal Server Error'));
+  }
+};
+
+// [ 이미지 업로드 용 ]
 const uploadImage = async (req, res, next) => {
   const image = req.file || null;
 
@@ -314,5 +474,9 @@ module.exports = {
   addComment,
   updateComment,
   deleteComment,
+  addCommentReply,
+  updateCommentReply,
+  deleteCommentReply,
+  addLikePosts,
   uploadImage,
 };

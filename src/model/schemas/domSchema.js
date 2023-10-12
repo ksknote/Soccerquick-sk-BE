@@ -78,18 +78,23 @@ const domSchema = new Schema({
         type: String,
         ref: 'Review.contents',
       },
+      image: {
+        type: String,
+        ref: 'Review.image',
+      },
       user_name: {
         type: String,
-        ref: 'Review.name',
+        ref: 'Review.user_name',
       },
       likedreviews: [
         {
           type: Schema.Types.ObjectId,
-          ref: 'Review.userslikes',
+          ref: 'Review.likedreviews',
         },
       ],
       user_icon: {
         type: String,
+        ref: 'Review.likedreviews',
       },
       createdAt: {
         type: String,

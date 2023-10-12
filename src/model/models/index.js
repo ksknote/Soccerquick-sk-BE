@@ -10,9 +10,14 @@ const AdminSchema = require('../schemas/adminSchema');
 const Admin = mongoose.model('Admin', AdminSchema);
 
 // [ 커뮤니티 관련 모델 ]
-const { PostSchema, CommentSchema } = require('../schemas/communitySchema');
+const {
+  PostSchema,
+  CommentSchema,
+  CommentReplySchema,
+} = require('../schemas/communitySchema');
 const Post = mongoose.model('Post', PostSchema);
 const Comment = mongoose.model('Comment', CommentSchema);
+const CommentReply = mongoose.model('CommentReply', CommentReplySchema);
 
 // [ 리뷰 관련 모델 ]
 const ReviewSchema = require('../schemas/reviewSchema');
@@ -32,6 +37,7 @@ module.exports = {
   WithdrawnUser,
   Post,
   Comment,
+  CommentReply,
   Review,
   Group,
   Dom,

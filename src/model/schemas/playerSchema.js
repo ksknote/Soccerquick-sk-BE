@@ -3,6 +3,10 @@ const { Schema } = require('mongoose');
 const playerSchema = {
   id: { type: Schema.Types.ObjectId, ref: 'User' },
   name: { type: String, ref: 'User.name' },
+  phone_number: {
+    type: String,
+    ref: 'User.phone_number',
+  },
   gender: { type: String, ref: 'User.gender' },
   position: { type: String, required: true },
   level: { type: String, required: true },

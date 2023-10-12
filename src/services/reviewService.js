@@ -54,7 +54,7 @@ const getPageReview = async (pageGroup) => {
 // [ 리뷰 등록 ]
 /** ([유저아이디, 풋볼장번호, 작성자이름, 평점, 리뷰내용 ]) */
 const addReview = async (reviews) => {
-  const { user_id, dom_id, contents } = reviews;
+  const { user_id, dom_id, contents, image } = reviews;
 
   try {
     const foundUser = await User.findOne({ user_id });
@@ -75,8 +75,10 @@ const addReview = async (reviews) => {
       user_id: userObjectId,
       dom_id: domObjectId,
       ground_id: dom_id,
-      name: foundUser.name,
+      user_name: foundUser.name,
+      user_icon: userIcon,
       contents,
+      image,
     };
 
     const newReview = await Review.create(newReviewField);
@@ -86,8 +88,9 @@ const addReview = async (reviews) => {
       dom_id: newReview.dom_id,
       ground_id: newReview.ground_id,
       contents: newReview.contents,
+      image: newReview.image,
       user_name: userName,
-      likedreviews: newReview.userslikes,
+      likedreviews: newReview.likedreviews,
       user_icon: userIcon,
       createdAt: newReview.createdAt,
       updatedAt: newReview.updatedAt,
@@ -112,8 +115,7 @@ const addReview = async (reviews) => {
 // [ 리뷰 수정 ]
 /** ([리뷰번호, 유저아이디, 평점, 리뷰내용 ]) */
 const updateReview = async (review) => {
-  const { reviewId, user_id, domId, contents } = review;
-
+  const { reviewId, user_id, domId, contents, image } = review;
   try {
     const foundReview = await Review.findOne({ review_id: reviewId });
     if (!foundReview) return new AppError(404, '존재하지 않는 리뷰입니다.');
@@ -128,6 +130,7 @@ const updateReview = async (review) => {
 
     const updatedReviewObj = {
       contents,
+      image,
     };
 
     const updatedReview = await Review.findOneAndUpdate(
@@ -144,6 +147,7 @@ const updateReview = async (review) => {
 
       if (reviewId === review_id) {
         review.contents = contents;
+        review.image = image;
         review.updatedAt = updatedReview.updatedAt;
       }
     });
@@ -206,7 +210,7 @@ const addLikesReview = async (reviewId, user_id) => {
     if (!foundReview) return new AppError(404, '리뷰를 찾을 수 없습니다.');
 
     const domObjectId = foundReview.dom_id;
-    const usersLikesArray = foundReview.userslikes;
+    const usersLikesArray = foundReview.likedreviews;
     const filteredUsersReviews = usersLikesArray.filter(
       (user) => user._id.toString() === userObjectId
     );
@@ -230,7 +234,7 @@ const addLikesReview = async (reviewId, user_id) => {
       _id: userObjectId,
       user_id,
     });
-    foundReview.userslikes = usersLikesArray;
+    foundReview.likedreviews = usersLikesArray;
     await foundReview.save();
 
     return {
@@ -257,7 +261,7 @@ const removeLikesReview = async (reviewId, user_id) => {
     if (!foundReview) return new AppError(404, '존재하지 않는 리뷰 입니다.');
 
     const domObjectId = foundReview.dom_id;
-    const usersLikesArray = foundReview.userslikes;
+    const usersLikesArray = foundReview.likedreviews;
 
     const filteredUsersReviews = usersLikesArray.filter(
       (user) => user._id.toString() !== userObjectId
@@ -285,7 +289,7 @@ const removeLikesReview = async (reviewId, user_id) => {
 
     await foundDom.save();
 
-    foundReview.userslikes = usersLikesArray;
+    foundReview.likedreviews = usersLikesArray;
     await foundReview.save();
 
     return {

@@ -4,35 +4,46 @@ const { createGroupId } = require('../utils/createIndex');
 const toString = require('../utils/toString');
 
 // [ 전체 팀 그룹 조회 ]
-const getAllGroups = async () => {
+const getAllGroups = async (status, region, city, startIdx, endIdx) => {
   try {
+    const filteringOption = {
+      status: status,
+      region: region,
+      city: city,
+    };
+
     const foundGroup = await Group.find();
 
     if (!foundGroup)
       return new AppError(404, '등록된 팀 그룹이 존재하지 않습니다.');
 
-    const formattedGroups = foundGroup.map((group) => ({
-      group_id: group.group_id,
-      title: group.title,
-      leader_id: group.leader.leader_id,
-      leader_name: group.leader.leader_name,
-      contents: group.contents,
-      location: group.location,
-      status: group.status,
-      gk_count: group.recruitment_count.gk_count,
-      player_count: group.recruitment_count.player_count,
-      gk_current_count: group.recruitment_count.gk_current_count,
-      player_current_count: group.recruitment_count.player_current_count,
-      random_matched: group.random_matched,
-      applicant: group.applicant,
-      accept: group.accept,
-    }));
+    const filteredData = foundGroup.filter((team) => {
+      const optionKeys = Object.keys(filteringOption);
+      for (let key of optionKeys) {
+        if (!filteringOption[key]) continue;
+        if (filteringOption[key] === '전체') continue;
+        if (team[key] !== filteringOption[key]) {
+          return false;
+        } else continue;
+      }
+      return true;
+    });
 
-    return {
-      statusCode: 200,
-      message: '전체 팀 그룹 목록 조회 성공',
-      data: formattedGroups,
-    };
+    const recentFilteredData = filteredData.reverse();
+    const slicedPost = recentFilteredData.slice(startIdx, endIdx);
+
+    if (slicedPost.length > 0) {
+      return {
+        statusCode: 200,
+        message: '전체 게시글 조회 성공',
+        data: slicedPost,
+      };
+    } else {
+      return {
+        statusCode: 204,
+        message: '더 이상 게시글이 없습니다.',
+      };
+    }
   } catch (error) {
     console.error(error);
     return new AppError(500, 'Internal Server Error');
@@ -51,8 +62,10 @@ const getOneGroup = async (group_id) => {
       title: foundGroup.title,
       leader_id: foundGroup.leader.leader_id,
       leader_name: foundGroup.leader.leader_name,
+      leader_phone_number: foundGroup.leader.leader_phone_number,
       contents: foundGroup.contents,
-      location: foundGroup.location,
+      region: foundGroup.region,
+      city: foundGroup.city,
       status: foundGroup.status,
       gk_count: foundGroup.recruitment_count.gk_count,
       player_count: foundGroup.recruitment_count.player_count,
@@ -61,6 +74,8 @@ const getOneGroup = async (group_id) => {
       random_matched: foundGroup.random_matched,
       applicant: foundGroup.applicant,
       accept: foundGroup.accept,
+      createdAt: foundGroup.createdAt,
+      updatedAt: foundGroup.updatedAt,
     };
 
     return { statusCode: 200, message: '팀 조회 성공', data: groupData };
@@ -93,7 +108,8 @@ const updateMyGroup = async (myGroup) => {
   const {
     groupId,
     user_id,
-    location,
+    region,
+    city,
     status,
     gk_count,
     player_count,
@@ -120,7 +136,8 @@ const updateMyGroup = async (myGroup) => {
       return new AppError(403, ' 팀 리더만 수정 가능합니다.');
 
     const newGroupData = {
-      location,
+      region,
+      city,
       status,
       recruitment_count: {
         gk_count,
@@ -143,8 +160,10 @@ const updateMyGroup = async (myGroup) => {
       title: newGroup.title,
       leader_id: newGroup.leader.leader_id,
       leader_name: newGroup.leader.leader_name,
+      leader_phone_number: newGroup.leader.leader_phone_number,
       contents: newGroup.contents,
-      location: newGroup.location,
+      region: newGroup.region,
+      city: newGroup.city,
       status: newGroup.status,
       gk_count: newGroup.recruitment_count.gk_count,
       player_count: newGroup.recruitment_count.player_count,
@@ -172,7 +191,8 @@ const addGroup = async (group) => {
   const {
     title,
     leader_id,
-    location,
+    region,
+    city,
     gk_count,
     player_count,
     gk_current_count,
@@ -187,6 +207,7 @@ const addGroup = async (group) => {
 
     const leaderObjectId = foundLeader._id;
     const leaderName = foundLeader.name;
+    const leaderPhoneNumber = foundLeader.phone_number;
 
     const groupId = await createGroupId();
 
@@ -195,8 +216,10 @@ const addGroup = async (group) => {
       leader: {
         leader_id: leaderObjectId,
         leader_name: leaderName,
+        leader_phone_number: leaderPhoneNumber,
       },
-      location: location,
+      region,
+      city,
       recruitment_count: {
         gk_count: Number(gk_count),
         player_count: Number(player_count),
@@ -214,8 +237,10 @@ const addGroup = async (group) => {
       title: createGroup.title,
       leader_id: createGroup.leader.leader_id,
       leader_name: createGroup.leader.leader_name,
+      leader_phone_number: createGroup.leader.leader_phone_number,
       contents: createGroup.contents,
-      location: createGroup.location,
+      region: createGroup.region,
+      city: createGroup.city,
       status: createGroup.status,
       gk_count: createGroup.recruitment_count.gk_count,
       player_count: createGroup.recruitment_count.player_count,
@@ -248,6 +273,7 @@ const userApplicantGroup = async (user) => {
 
     const userObjectId = foundUser._id;
     const userName = foundUser.name;
+    const userPhoneNumber = foundUser.phone_number;
     const userGender = foundUser.gender;
     const userStatus = foundUser.applicant_status;
 
@@ -274,6 +300,7 @@ const userApplicantGroup = async (user) => {
       id: userObjectId,
       name: userName,
       gender: userGender,
+      phone_number: userPhoneNumber,
       position,
       level,
       contents,
@@ -344,14 +371,14 @@ const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
           throw new AppError(400, '신청 가능한 플레이어 포지션은 0 개 입니다!');
 
         if (user.position !== '골키퍼' && player_count > 0) {
-          user.status = '모집 불가능';
+          // user.status = '모집 불가능';
           acceptArray.push(user);
           applicants.splice(idx, 1);
           player_count -= 1;
           player_current_count += 1;
         }
 
-        foundUser.applicant_status = '모집 불가능';
+        // foundUser.applicant_status = '모집 불가능';
         await foundUser.save();
 
         foundApplicantUser = true;
@@ -378,7 +405,7 @@ const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
 
     await Group.updateOne(
       { _id: foundGroup._id, 'accept.id': userObjectId },
-      { $set: { 'accept.$[elem].status': '모집 불가능' } },
+      // { $set: { 'accept.$[elem].status': '모집 불가능' } },
       { arrayFilters: [{ 'elem.id': userObjectId }] }
     ).exec();
 
@@ -386,7 +413,7 @@ const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
 
     await Group.updateMany(
       { 'applicant.id': userObjectId },
-      { $set: { 'applicant.$[elem].status': '모집 불가능' } },
+      // { $set: { 'applicant.$[elem].status': '모집 불가능' } },
       { arrayFilters: [{ 'elem.id': userObjectId }] }
     ).exec();
 
@@ -395,8 +422,10 @@ const leaderApplicantAccept = async (groupId, leaderId, user_id) => {
       title: foundGroup.title,
       leader_id: foundGroup.leader.leader_id,
       leader_name: foundGroup.leader.leader_name,
+      leader_phone_number: foundGroup.leader.leader_phone_number,
       contents: foundGroup.contents,
-      location: foundGroup.location,
+      region: foundGroup.region,
+      city: foundGroup.city,
       status: foundGroup.status,
       gk_count: foundGroup.recruitment_count.gk_count,
       player_count: foundGroup.recruitment_count.player_count,
@@ -461,7 +490,8 @@ const leaderApplicantReject = async (groupId, leaderId, user_id) => {
       leader_id: foundGroup.leader.leader_id,
       leader_name: foundGroup.leader.leader_name,
       contents: foundGroup.contents,
-      location: foundGroup.location,
+      region: foundGroup.region,
+      city: foundGroup.city,
       status: foundGroup.status,
       gk_count: foundGroup.recruitment_count.gk_count,
       player_count: foundGroup.recruitment_count.player_count,

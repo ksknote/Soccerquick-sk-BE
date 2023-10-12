@@ -12,6 +12,9 @@ const ReviewSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    user_icon: {
+      type: String,
+    },
     dom_id: {
       type: Schema.Types.ObjectId,
       ref: 'Dom',
@@ -22,7 +25,7 @@ const ReviewSchema = new Schema(
       ref: 'Dom.dom_id',
       required: true,
     },
-    name: {
+    user_name: {
       type: String,
       ref: 'User',
       required: true,
@@ -31,7 +34,11 @@ const ReviewSchema = new Schema(
       type: String,
       required: true,
     },
-    userslikes: [
+    image: {
+      type: String,
+      required: false,
+    },
+    likedreviews: [
       {
         _id: {
           type: Schema.Types.ObjectId,

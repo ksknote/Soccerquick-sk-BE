@@ -8,6 +8,21 @@ const PostSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    userId: {
+      type: String,
+      ref: 'User.user_id',
+      required: true,
+    },
+    nick_name: {
+      type: String,
+      ref: 'User.nick_name',
+      required: true,
+    },
+    profile: {
+      type: String,
+      ref: 'User.profile',
+      required: true,
+    },
     post_id: {
       type: String,
       required: true,
@@ -21,9 +36,18 @@ const PostSchema = new Schema(
       type: String,
       required: true,
     },
-    image: [
+    thumbnail: {
+      type: String,
+      required: false,
+    },
+    subject: {
+      type: String,
+      required: false,
+    },
+    hashTags: [
       {
         type: String,
+        required: false,
       },
     ],
     notice: {
@@ -32,6 +56,18 @@ const PostSchema = new Schema(
       default: '일반 게시글',
     },
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
+    like: [
+      {
+        _id: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+        },
+        user_id: {
+          type: String,
+          ref: 'User.user_id',
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -48,10 +84,75 @@ const CommentSchema = new Schema(
       ref: 'User',
       required: true,
     },
-    post_id: {
-      type: Schema.Types.ObjectId,
-      ref: 'Post',
+    userId: {
+      type: String,
+      ref: 'User.user_id',
       required: true,
+    },
+    nick_name: {
+      type: String,
+      ref: 'User.nick_name',
+      required: true,
+    },
+    profile: {
+      type: String,
+      ref: 'User.profile',
+      required: true,
+    },
+    post_id: {
+      type: String,
+      ref: 'Post.post_id',
+      required: true,
+    },
+    content: { type: String, required: true },
+    image: {
+      type: String,
+      required: false,
+    },
+    replies: [{ type: Schema.Types.ObjectId, ref: 'CommentReply' }],
+  },
+  { timestamps: true }
+);
+
+const CommentReplySchema = new Schema(
+  {
+    reply_id: {
+      type: String,
+      required: true,
+    },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    userId: {
+      type: String,
+      ref: 'User.user_id',
+      required: true,
+    },
+    nick_name: {
+      type: String,
+      ref: 'User.nick_name',
+      required: true,
+    },
+    profile: {
+      type: String,
+      ref: 'User.profile',
+      required: true,
+    },
+    post_id: {
+      type: String,
+      ref: 'Post.post_id',
+      required: true,
+    },
+    comment_id: {
+      type: String,
+      ref: 'Comment.comment_id',
+      required: true,
+    },
+    image: {
+      type: String,
+      required: false,
     },
     content: { type: String, required: true },
   },
@@ -61,4 +162,5 @@ const CommentSchema = new Schema(
 module.exports = {
   PostSchema,
   CommentSchema,
+  CommentReplySchema,
 };

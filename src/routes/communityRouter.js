@@ -19,12 +19,22 @@ router.get('/:postId', tokenValidator, communityController.getOnePost);
 router.post(
   '/',
   tokenValidator,
-  imageUpload.array('image', 3),
+  // imageUpload.array('image', 3),
   communityController.addPost
 );
 
+// [ 커뮤니티 게시글 좋아요 ]
+router.post('/like', tokenValidator, communityController.addLikePosts);
+
 //[ 커뮤니티 게시글 댓글 등록 ]
 router.post('/:postId/comment', tokenValidator, communityController.addComment);
+
+// [ 커뮤니티 게시글 대댓글 등록]
+router.post(
+  '/:postId/comment/:commentId/reply',
+  tokenValidator,
+  communityController.addCommentReply
+);
 
 //[ 이미지 업로드 ]
 router.post(
@@ -35,6 +45,9 @@ router.post(
 );
 
 /* PATCH */
+// [ 커뮤니티 게시글 수정 ]
+router.patch('/:postId', tokenValidator, communityController.updatePost);
+
 //[ 커뮤니티 게시글 댓글 수정]
 router.patch(
   '/:postId/comment/:commentId',
@@ -42,8 +55,12 @@ router.patch(
   communityController.updateComment
 );
 
-// [ 커뮤니티 게시글 수정 ]
-router.patch('/:postId', tokenValidator, communityController.updatePost);
+// [ 커뮤니티 게시글 대댓글 수정]
+router.patch(
+  '/:postId/comment/:commentId/reply/:replyId',
+  tokenValidator,
+  communityController.updateCommentReply
+);
 
 /* DELETE*/
 // [ 커뮤니티 게시글 삭제 ]
@@ -54,6 +71,13 @@ router.delete(
   '/:postId/comment/:commentId',
   tokenValidator,
   communityController.deleteComment
+);
+
+// [ 커뮤니티 게시글 대댓글 삭제]
+router.delete(
+  '/:postId/comment/:commentId/reply/:replyId',
+  tokenValidator,
+  communityController.deleteCommentReply
 );
 
 module.exports = router;
