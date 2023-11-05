@@ -42,7 +42,7 @@ const UserSchema = new Schema(
     profile: {
       type: String,
       default:
-        'https://soccerquick.s3.ap-northeast-2.amazonaws.com/default_profile.png',
+        'https://soccerquickbucket.s3.ap-northeast-2.amazonaws.com/soccerball.png',
     },
     role: {
       type: String,

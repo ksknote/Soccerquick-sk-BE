@@ -60,6 +60,7 @@ const getOneGroup = async (group_id) => {
     const groupData = {
       group_id: foundGroup.group_id,
       title: foundGroup.title,
+      profile: foundGroup.leader.profile,
       leader_id: foundGroup.leader.leader_id,
       leader_name: foundGroup.leader.leader_name,
       leader_phone_number: foundGroup.leader.leader_phone_number,
@@ -208,12 +209,14 @@ const addGroup = async (group) => {
     const leaderObjectId = foundLeader._id;
     const leaderName = foundLeader.name;
     const leaderPhoneNumber = foundLeader.phone_number;
+    const profile = foundLeader.profile;
 
     const groupId = await createGroupId();
 
     const groupData = {
       group_id: groupId,
       leader: {
+        profile,
         leader_id: leaderObjectId,
         leader_name: leaderName,
         leader_phone_number: leaderPhoneNumber,
@@ -276,6 +279,7 @@ const userApplicantGroup = async (user) => {
     const userPhoneNumber = foundUser.phone_number;
     const userGender = foundUser.gender;
     const userStatus = foundUser.applicant_status;
+    const profile = foundUser.profile;
 
     const foundGroup = await Group.findOne({ group_id: groupId });
     if (!foundGroup) return new AppError(404, '존재하지 않는 팀 그룹입니다.');
@@ -305,6 +309,7 @@ const userApplicantGroup = async (user) => {
       level,
       contents,
       status: userStatus,
+      profile,
     };
 
     applicants.push(applicantUserData);

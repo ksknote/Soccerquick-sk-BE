@@ -8,6 +8,11 @@ const GroupSchema = new Schema(
       required: true,
     },
     leader: {
+      profile: {
+        type: String,
+        ref: 'User.profile',
+        required: true,
+      },
       leader_id: {
         type: Schema.Types.ObjectId,
         ref: 'User',
